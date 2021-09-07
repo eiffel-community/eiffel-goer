@@ -17,6 +17,6 @@
 // This package is only for generating the mocks that are used in test.
 package test
 
-//go:generate mockgen -destination mock_drivers/mock_drivers.go github.com/eiffel-community/eiffel-goer/internal/database/drivers DatabaseDriver
+//go:generate mockgen -destination mock_drivers/mock_drivers.go github.com/eiffel-community/eiffel-goer/internal/database/drivers DatabaseDriver,Database
 //go:generate mockgen -destination mock_config/mock_config.go github.com/eiffel-community/eiffel-goer/internal/config Config
 //go:generate mockgen -destination mock_server/mock_server.go github.com/eiffel-community/eiffel-goer/pkg/server Server

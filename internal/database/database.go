@@ -26,16 +26,16 @@ import (
 )
 
 // Get a new Database.
-func Get(connectionString string, logger *log.Entry) (drivers.DatabaseDriver, error) {
-	var drivers = []drivers.DatabaseDriver{&mongodb.Driver{}}
+func Get(connectionString string, logger *log.Entry) (drivers.Database, error) {
+	var databases = []drivers.Database{&mongodb.Database{}}
 
 	connectionURL, err := url.Parse(connectionString)
 	if err != nil {
 		return nil, err
 	}
-	for _, driver := range drivers {
-		if driver.SupportsScheme(connectionURL.Scheme) {
-			return driver.Get(connectionURL, logger)
+	for _, database := range databases {
+		if database.SupportsScheme(connectionURL.Scheme) {
+			return database.Get(connectionURL, logger)
 		}
 	}
 	return nil, fmt.Errorf("cannot find database for scheme %q", connectionURL.Scheme)

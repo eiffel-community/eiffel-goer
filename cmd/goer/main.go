@@ -50,7 +50,10 @@ func main() {
 		log.Panic(err)
 	}
 
-	app.LoadV1Alpha1Routes()
+	err = app.LoadV1Alpha1Routes()
+	if err != nil {
+		log.Panic(err)
+	}
 
 	log.Debug("Starting up.")
 	err = app.Start(ctx)

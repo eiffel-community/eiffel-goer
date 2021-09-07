@@ -49,14 +49,16 @@ func TestRoutes(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	mockCfg := mock_config.NewMockConfig(ctrl)
-	mockDB := mock_drivers.NewMockDatabaseDriver(ctrl)
+	mockDB := mock_drivers.NewMockDatabase(ctrl)
+	mockDriver := mock_drivers.NewMockDatabaseDriver(ctrl)
 
 	mockCfg.EXPECT().DBConnectionString().Return("").AnyTimes()
 	mockCfg.EXPECT().APIPort().Return(":8080").AnyTimes()
+	mockDB.EXPECT().Driver().Return(mockDriver, nil).AnyTimes()
 	// Have to use 'gomock.Any()' for the context as mux adds values to the request context.
-	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(schema.EiffelEvent{}, nil)
-	mockDB.EXPECT().GetEvents(gomock.Any()).Return([]schema.EiffelEvent{}, nil)
-	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]schema.EiffelEvent{}, nil)
+	mockDriver.EXPECT().GetEventByID(gomock.Any(), eventID).Return(schema.EiffelEvent{}, nil)
+	mockDriver.EXPECT().GetEvents(gomock.Any()).Return([]schema.EiffelEvent{}, nil)
+	mockDriver.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]schema.EiffelEvent{}, nil)
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {

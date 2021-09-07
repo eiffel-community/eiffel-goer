@@ -102,7 +102,7 @@ func TestGetDB(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_, ok := db.(drivers.DatabaseDriver)
+	_, ok := db.(drivers.Database)
 	if !ok {
 		t.Error("database from 'getDB' is not a Database interface")
 	}
@@ -118,9 +118,35 @@ func TestLoadV1Alpha1Routes(t *testing.T) {
 		t.Error(err)
 	}
 
-	app.LoadV1Alpha1Routes()
+	err = app.LoadV1Alpha1Routes()
+	if err != nil {
+		t.Error(err)
+	}
 	route := app.Router.Get("v1alpha1")
 	if route == nil {
+		t.Error("the v1alpha1 route did not get loaded")
+	}
+}
+
+// Test that the application exits if there is an error getting the database driver.
+func TestLoadV1Alpha1RoutesDriverError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockCfg := mock_config.NewMockConfig(ctrl)
+	mockDB := mock_drivers.NewMockDatabase(ctrl)
+	mockCfg.EXPECT().DBConnectionString().Return("mongodb://testdb/testdb").Times(2)
+	mockDB.EXPECT().Driver().Return(&mock_drivers.MockDatabaseDriver{}, errors.New("this is an error"))
+	app, err := Get(mockCfg, &log.Entry{})
+	if err != nil {
+		t.Error(err)
+	}
+	app.Database = mockDB
+
+	err = app.LoadV1Alpha1Routes()
+	if err == nil {
+		t.Error("the v1alpha1 routes loaded when there was an error getting database driver")
+	}
+	route := app.Router.Get("v1alpha1")
+	if route != nil {
 		t.Error("the v1alpha1 route did not get loaded")
 	}
 }
@@ -129,7 +155,7 @@ func TestLoadV1Alpha1Routes(t *testing.T) {
 func TestStart(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockCfg := mock_config.NewMockConfig(ctrl)
-	mockDB := mock_drivers.NewMockDatabaseDriver(ctrl)
+	mockDB := mock_drivers.NewMockDatabase(ctrl)
 	mockServer := mock_server.NewMockServer(ctrl)
 	ctx := context.Background()
 
@@ -163,7 +189,7 @@ func TestStartAbort(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockCfg := mock_config.NewMockConfig(ctrl)
-	mockDB := mock_drivers.NewMockDatabaseDriver(ctrl)
+	mockDB := mock_drivers.NewMockDatabase(ctrl)
 	mockServer := mock_server.NewMockServer(ctrl)
 	ctx := context.Background()
 
@@ -194,7 +220,7 @@ func TestStartAbort(t *testing.T) {
 func TestStartFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockCfg := mock_config.NewMockConfig(ctrl)
-	mockDB := mock_drivers.NewMockDatabaseDriver(ctrl)
+	mockDB := mock_drivers.NewMockDatabase(ctrl)
 	mockServer := mock_server.NewMockServer(ctrl)
 	ctx := context.Background()
 
@@ -225,7 +251,7 @@ func TestStartFail(t *testing.T) {
 func TestStop(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockCfg := mock_config.NewMockConfig(ctrl)
-	mockDB := mock_drivers.NewMockDatabaseDriver(ctrl)
+	mockDB := mock_drivers.NewMockDatabase(ctrl)
 	ctx := context.Background()
 
 	mockCfg.EXPECT().DBConnectionString().Return("mongodb://testdb/testdb").Times(2)

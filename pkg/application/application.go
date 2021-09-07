@@ -29,7 +29,7 @@ import (
 )
 
 type Application struct {
-	Database drivers.DatabaseDriver
+	Database drivers.Database
 	Config   config.Config
 	Router   *mux.Router
 	Server   server.Server
@@ -56,7 +56,7 @@ func Get(cfg config.Config, logger *log.Entry) (*Application, error) {
 }
 
 // getDB gets, but does not connect to, a database.
-func (app *Application) getDB() (drivers.DatabaseDriver, error) {
+func (app *Application) getDB() (drivers.Database, error) {
 	db, err := database.Get(
 		app.Config.DBConnectionString(),
 		app.Logger,
@@ -68,14 +68,19 @@ func (app *Application) getDB() (drivers.DatabaseDriver, error) {
 }
 
 // LoadV1Alpha1Routes loads routes for the /v1alpha1/ endpoint.
-func (app *Application) LoadV1Alpha1Routes() {
+func (app *Application) LoadV1Alpha1Routes() error {
+	driver, err := app.Database.Driver()
+	if err != nil {
+		return err
+	}
 	app.V1Alpha1 = &v1alpha1.V1Alpha1Application{
 		Config:   app.Config,
-		Database: app.Database,
+		Database: driver,
 		Logger:   app.Logger,
 	}
 	subrouter := app.Router.PathPrefix("/v1alpha1").Name("v1alpha1").Subrouter()
 	app.V1Alpha1.AddRoutes(subrouter)
+	return nil
 }
 
 // Start connects to the database and starts the webserver.

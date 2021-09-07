@@ -36,14 +36,15 @@ import (
 	"github.com/eiffel-community/eiffel-goer/internal/schema"
 )
 
-type Driver struct {
-	Client   *mongo.Client
-	Database *mongo.Database
-	Logger   *log.Entry
+// Database is a MongoDB database connection.
+type Database struct {
+	logger           *log.Entry
+	client           *mongo.Client
+	connectionString connstring.ConnString
 }
 
 // Get creates a new database.Database interface against MongoDB.
-func (m *Driver) Get(connectionURL *url.URL, logger *log.Entry) (drivers.DatabaseDriver, error) {
+func (d *Database) Get(connectionURL *url.URL, logger *log.Entry) (drivers.Database, error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(connectionURL.String()))
 	if err != nil {
 		return nil, err
@@ -52,15 +53,15 @@ func (m *Driver) Get(connectionURL *url.URL, logger *log.Entry) (drivers.Databas
 	if err != nil {
 		return nil, err
 	}
-	return &Driver{
-		Client:   client,
-		Database: client.Database(connectionString.Database),
-		Logger:   logger,
+	return &Database{
+		client:           client,
+		connectionString: connectionString,
+		logger:           logger,
 	}, nil
 }
 
 // Test whether the MongoDB driver supports a scheme.
-func (m *Driver) SupportsScheme(scheme string) bool {
+func (d *Database) SupportsScheme(scheme string) bool {
 	switch scheme {
 	case "mongodb":
 		return true
@@ -71,13 +72,32 @@ func (m *Driver) SupportsScheme(scheme string) bool {
 	}
 }
 
+// Driver creates a new database driver for event requests.
+func (d *Database) Driver() (drivers.DatabaseDriver, error) {
+	return &Driver{
+		database: d.client.Database(d.connectionString.Database),
+		logger:   d.logger,
+	}, nil
+}
+
 // Connect to the MongoDB database and ping it to make sure it works.
-func (m *Driver) Connect(ctx context.Context) error {
-	err := m.Client.Connect(ctx)
+func (d *Database) Connect(ctx context.Context) error {
+	err := d.client.Connect(ctx)
 	if err != nil {
 		return err
 	}
-	return m.Client.Ping(ctx, readpref.Primary())
+	return d.client.Ping(ctx, readpref.Primary())
+}
+
+// Close the database connection.
+func (d *Database) Close(ctx context.Context) error {
+	return d.client.Disconnect(ctx)
+}
+
+// Driver is a database driver for requesting events from MongoDB.
+type Driver struct {
+	database *mongo.Database
+	logger   *log.Entry
 }
 
 // GetEvents gets all events information.
@@ -97,14 +117,14 @@ func (m *Driver) UpstreamDownstreamSearch(ctx context.Context, id string) ([]sch
 
 // GetEventByID gets an event by ID in all collections.
 func (m *Driver) GetEventByID(ctx context.Context, id string) (schema.EiffelEvent, error) {
-	collections, err := m.Database.ListCollectionNames(ctx, bson.D{})
+	collections, err := m.database.ListCollectionNames(ctx, bson.D{})
 	if err != nil {
 		return schema.EiffelEvent{}, err
 	}
 	filter := bson.D{{"meta.id", id}}
 	for _, collection := range collections {
 		var event schema.EiffelEvent
-		singleResult := m.Database.Collection(collection).FindOne(ctx, filter)
+		singleResult := m.database.Collection(collection).FindOne(ctx, filter)
 		err := singleResult.Decode(&event)
 		if err != nil {
 			continue
@@ -113,9 +133,4 @@ func (m *Driver) GetEventByID(ctx context.Context, id string) (schema.EiffelEven
 		}
 	}
 	return schema.EiffelEvent{}, fmt.Errorf("%q not found in any collection", id)
-}
-
-// Close the database connection.
-func (m *Driver) Close(ctx context.Context) error {
-	return m.Client.Disconnect(ctx)
 }
