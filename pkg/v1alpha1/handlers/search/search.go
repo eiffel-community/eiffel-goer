@@ -27,12 +27,12 @@ import (
 
 type SearchHandler struct {
 	Config   config.Config
-	Database drivers.DatabaseDriver
+	Database drivers.Database
 	Logger   *log.Entry
 }
 
 // Get a new handler for the search endpoint.
-func Get(cfg config.Config, db drivers.DatabaseDriver, logger *log.Entry) *SearchHandler {
+func Get(cfg config.Config, db drivers.Database, logger *log.Entry) *SearchHandler {
 	return &SearchHandler{
 		cfg, db, logger,
 	}

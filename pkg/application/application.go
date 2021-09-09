@@ -38,7 +38,7 @@ type Application struct {
 }
 
 // Get a new Goer application.
-func Get(cfg config.Config, logger *log.Entry) (*Application, error) {
+func Get(ctx context.Context, cfg config.Config, logger *log.Entry) (*Application, error) {
 	application := &Application{
 		Config: cfg,
 		Router: mux.NewRouter(),
@@ -46,7 +46,7 @@ func Get(cfg config.Config, logger *log.Entry) (*Application, error) {
 		Logger: logger,
 	}
 	if cfg.DBConnectionString() != "" {
-		db, err := application.getDB()
+		db, err := application.getDB(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -55,9 +55,10 @@ func Get(cfg config.Config, logger *log.Entry) (*Application, error) {
 	return application, nil
 }
 
-// getDB gets, but does not connect to, a database.
-func (app *Application) getDB() (drivers.Database, error) {
+// getDB gets, and connects to, a database.
+func (app *Application) getDB(ctx context.Context) (drivers.Database, error) {
 	db, err := database.Get(
+		ctx,
 		app.Config.DBConnectionString(),
 		app.Logger,
 	)
@@ -68,31 +69,22 @@ func (app *Application) getDB() (drivers.Database, error) {
 }
 
 // LoadV1Alpha1Routes loads routes for the /v1alpha1/ endpoint.
-func (app *Application) LoadV1Alpha1Routes() error {
-	driver, err := app.Database.Driver()
-	if err != nil {
-		return err
-	}
+func (app *Application) LoadV1Alpha1Routes() {
 	app.V1Alpha1 = &v1alpha1.V1Alpha1Application{
 		Config:   app.Config,
-		Database: driver,
+		Database: app.Database,
 		Logger:   app.Logger,
 	}
 	subrouter := app.Router.PathPrefix("/v1alpha1").Name("v1alpha1").Subrouter()
 	app.V1Alpha1.AddRoutes(subrouter)
-	return nil
 }
 
 // Start connects to the database and starts the webserver.
 // This is a blocking function, waiting for the webserver to shut down.
 func (app *Application) Start(ctx context.Context) error {
 	srv := app.Server.WithAddr(app.Config.APIPort()).WithRouter(app.Router)
-	err := app.Database.Connect(ctx)
-	if err != nil {
-		return err
-	}
 	defer app.Stop(ctx)
-	err = srv.Start()
+	err := srv.Start()
 	if err != nil {
 		return err
 	}

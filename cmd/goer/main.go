@@ -45,15 +45,12 @@ func main() {
 		"application": "eiffel-goer",
 		"version":     GitSummary,
 	})
-	app, err := application.Get(cfg, log)
+	app, err := application.Get(ctx, cfg, log)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = app.LoadV1Alpha1Routes()
-	if err != nil {
-		log.Panic(err)
-	}
+	app.LoadV1Alpha1Routes()
 
 	log.Debug("Starting up.")
 	err = app.Start(ctx)

@@ -25,16 +25,14 @@ import (
 )
 
 type DatabaseDriver interface {
+	Get(context.Context, *url.URL, *log.Entry) (Database, error)
+	SupportsScheme(string) bool
+}
+
+type Database interface {
 	GetEvents(context.Context) ([]schema.EiffelEvent, error)
 	SearchEvent(context.Context, string) (schema.EiffelEvent, error)
 	UpstreamDownstreamSearch(context.Context, string) ([]schema.EiffelEvent, error)
 	GetEventByID(context.Context, string) (schema.EiffelEvent, error)
-}
-
-type Database interface {
-	Get(*url.URL, *log.Entry) (Database, error)
-	Driver() (DatabaseDriver, error)
-	Connect(context.Context) error
-	SupportsScheme(string) bool
 	Close(context.Context) error
 }

@@ -29,12 +29,12 @@ import (
 
 type EventHandler struct {
 	Config   config.Config
-	Database drivers.DatabaseDriver
+	Database drivers.Database
 	Logger   *log.Entry
 }
 
 // Create a new handler for the event endpoint.
-func Get(cfg config.Config, db drivers.DatabaseDriver, logger *log.Entry) *EventHandler {
+func Get(cfg config.Config, db drivers.Database, logger *log.Entry) *EventHandler {
 	return &EventHandler{
 		cfg, db, logger,
 	}

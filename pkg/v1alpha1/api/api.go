@@ -27,7 +27,7 @@ import (
 )
 
 type V1Alpha1Application struct {
-	Database drivers.DatabaseDriver
+	Database drivers.Database
 	Config   config.Config
 	Logger   *log.Entry
 }
