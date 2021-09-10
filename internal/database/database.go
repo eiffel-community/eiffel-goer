@@ -26,8 +26,8 @@ import (
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers/mongodb"
 )
 
-// Slice of drivers that are supported at the moment.
-// Variable is exported to assist with testing of this and other packages.
+// Drivers contains the drivers that are supported at the moment.
+// The variable is exported to assist with testing of this and other packages.
 var Drivers = []drivers.DatabaseDriver{&mongodb.Driver{}}
 
 // Get a new database driver and connect to database.
@@ -36,9 +36,9 @@ func Get(ctx context.Context, connectionString string, logger *log.Entry) (drive
 	if err != nil {
 		return nil, err
 	}
-	for _, database := range Drivers {
-		if database.SupportsScheme(connectionURL.Scheme) {
-			return database.Get(ctx, connectionURL, logger)
+	for _, driver := range Drivers {
+		if driver.SupportsScheme(connectionURL.Scheme) {
+			return driver.Get(ctx, connectionURL, logger)
 		}
 	}
 	return nil, fmt.Errorf("cannot find database for scheme %q", connectionURL.Scheme)
