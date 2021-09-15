@@ -43,7 +43,7 @@ func TestRoutes(t *testing.T) {
 		statusCode int
 	}{
 		{name: "EventsRead", httpMethod: http.MethodGet, url: "/v1alpha1/events/" + eventID, statusCode: http.StatusOK},
-		{name: "EventsReadAll", httpMethod: http.MethodGet, url: "/v1alpha1/events", statusCode: http.StatusNotImplemented},
+		{name: "EventsReadAll", httpMethod: http.MethodGet, url: "/v1alpha1/events", statusCode: http.StatusOK},
 		{name: "SearchRead", httpMethod: http.MethodGet, url: "/v1alpha1/search/" + eventID, statusCode: http.StatusNotImplemented},
 		{name: "SearchUpstreamDownstream", httpMethod: http.MethodPost, url: "/v1alpha1/search/" + eventID, statusCode: http.StatusNotImplemented},
 	}
@@ -56,7 +56,7 @@ func TestRoutes(t *testing.T) {
 	mockCfg.EXPECT().APIPort().Return(":8080").AnyTimes()
 	// Have to use 'gomock.Any()' for the context as mux adds values to the request context.
 	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(schema.EiffelEvent{}, nil)
-	mockDB.EXPECT().GetEvents(gomock.Any()).Return([]schema.EiffelEvent{}, nil)
+	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]schema.EiffelEvent{}, nil)
 	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]schema.EiffelEvent{}, nil)
 
 	for _, testCase := range tests {
