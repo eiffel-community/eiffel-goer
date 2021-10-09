@@ -80,6 +80,24 @@ type multiResponse struct {
 	Items            []eiffelSchema.EiffelEvent `json:"items"`
 }
 
+// buildConditions takes a raw URL query, parses out all conditions and removes ignoreKeys.
+func buildConditions(rawQuery string, ignoreKeys map[string]struct{}) ([]query.Condition, error) {
+	var allConditions []query.Condition
+	res, err := query.Parse("nofile", []byte(rawQuery))
+	if err != nil {
+		return nil, err
+	}
+	allConditions = res.([]query.Condition)
+	var conditions []query.Condition
+	for _, condition := range allConditions {
+		_, ok := ignoreKeys[condition.Field]
+		if !ok {
+			conditions = append(conditions, condition)
+		}
+	}
+	return conditions, nil
+}
+
 // ReadAll handles GET requests against the /events/ endpoint.
 // To get all events information
 func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
@@ -91,20 +109,21 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 		Lazy:          false,
 		Readable:      false,
 	}
-	q := query.New(r.URL, h.Logger)
-	if err := q.Decode(&request); err != nil {
-		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
-		return
-	}
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+	decoder.Decode(&request, r.URL.Query())
+
 	ignoreKeys := getTags("schema", &request)
-	params, err := q.DecodeFilterParameters(ignoreKeys)
+	conditions, err := buildConditions(r.URL.RawQuery, ignoreKeys)
 	if err != nil {
+		h.Logger.Error(err)
 		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	request.Params = params
+	request.Conditions = conditions
 	events, err := h.Database.GetEvents(r.Context(), request)
 	if err != nil {
+		h.Logger.Error(err)
 		responses.RespondWithError(w, http.StatusNotFound, err.Error())
 		return
 	}

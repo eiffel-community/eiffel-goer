@@ -14,22 +14,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// requests is a place for request structs to be used for both
-// database and handlers.
-package requests
+// This package implements the database interface against MongoDB following
+// the collection structure implemented by the Eiffel GraphQL API and
+// Simple Event Sender.
+package query
 
-import "github.com/eiffel-community/eiffel-goer/internal/query"
+//go:generate pigeon -o query.go query.peg
 
-type MultipleEventsRequest struct {
-	Shallow       bool  `schema:"shallow"` // TODO: Unused
-	PageNo        int32 `schema:"pageNo"`
-	PageSize      int32 `schema:"pageSize"`
-	PageStartItem int32 `schema:"pageStartItem"`
-	Lazy          bool  `schema:"lazy"`
-	Readable      bool  `schema:"readable"` // TODO: Unused
-	Conditions    []query.Condition
+type Condition struct {
+	Field    string
+	Op       string
+	Value    string
+	TypeConv string
 }
 
-type SingleEventRequest struct {
-	Shallow bool `schema:"shallow"` // TODO: Unused
+// toIfaceSlice converts an interface to a slice of interfaces
+func toIfaceSlice(v interface{}) []interface{} {
+	if v == nil {
+		return nil
+	}
+	return v.([]interface{})
 }

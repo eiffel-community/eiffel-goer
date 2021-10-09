@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,6 +35,7 @@ import (
 
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/internal/query"
+
 	"github.com/eiffel-community/eiffel-goer/internal/requests"
 	"github.com/eiffel-community/eiffel-goer/internal/schema"
 )
@@ -96,24 +98,42 @@ type Database struct {
 
 // operators is a translation table from query.Param to mongodb operators.
 var operators = map[string]string{
-	"=": "$eq", "!=": "$ne", ">": "$gt", "<": "$lt", "<=": "$lte", ">=": "$gte",
+	"=": "$eq", "!=": "$ne", ">": "$gt", "<": "$lt", "<=": "$lte", ">=": "$gte", "exists": "$exists",
+}
+
+// typeCast values in condition based on TypeConv parameter. Returns a bson Element.
+func typeCast(condition query.Condition) (bson.E, error) {
+	var err error
+	e := bson.E{Key: operators[condition.Op]}
+	switch condition.TypeConv {
+	case "int":
+		e.Value, err = strconv.ParseInt(condition.Value, 0, 64)
+	case "double":
+		e.Value, err = strconv.ParseFloat(condition.Value, 64)
+	case "bool":
+		e.Value, err = strconv.ParseBool(condition.Value)
+	default:
+		e.Value = condition.Value
+		err = nil
+	}
+	return e, err
 }
 
 // buildFilter creates a MongoDB filter based on query parameters.
-func buildFilter(params query.Params) bson.D {
+func buildFilter(conditions []query.Condition) (bson.D, error) {
 	d := bson.D{}
-	for key, values := range params {
-		operations := bson.D{}
-		for _, value := range values {
-			operator, val := value[0], value[1]
-			operations = append(operations, bson.E{
-				Key:   operators[operator],
-				Value: val,
-			})
+	elements := map[string]bson.D{}
+	for _, condition := range conditions {
+		element, err := typeCast(condition)
+		if err != nil {
+			return d, err
 		}
-		d = append(d, bson.E{Key: key, Value: operations})
+		elements[condition.Field] = append(elements[condition.Field], element)
 	}
-	return d
+	for key, values := range elements {
+		d = append(d, bson.E{Key: key, Value: values})
+	}
+	return d, nil
 }
 
 // collections are the collection names from MongoDB but filtered so that not all collections
@@ -137,9 +157,14 @@ func (m *Database) collections(ctx context.Context, filter bson.D) ([]string, er
 
 // GetEvents gets all events information.
 func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEventsRequest) ([]schema.EiffelEvent, error) {
-	filter := buildFilter(request.Params)
+	filter, err := buildFilter(request.Conditions)
+	if err != nil {
+		m.logger.Errorf("Database: %v", err)
+		return nil, err
+	}
 	collections, err := m.collections(ctx, filter)
 	if err != nil {
+		m.logger.Errorf("Database: %v", err)
 		return nil, err
 	}
 
