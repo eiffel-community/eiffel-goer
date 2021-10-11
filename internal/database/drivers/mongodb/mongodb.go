@@ -35,7 +35,6 @@ import (
 
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/internal/query"
-
 	"github.com/eiffel-community/eiffel-goer/internal/requests"
 	"github.com/eiffel-community/eiffel-goer/internal/schema"
 )
