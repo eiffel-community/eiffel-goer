@@ -65,7 +65,7 @@ Field <- [a-zA-Z0-9]+ ( '.' [a-zA-Z0-9]+ )* {
     return string(c.text), nil
 }
 
-TypeCastOp <- ( "int" / "double" ) {
+TypeCastOp <- ( "int" / "double" / "bool" ) {
     return string(c.text), nil
 }
 
