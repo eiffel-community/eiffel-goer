@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This package is used to generate the query.go file from query.peg
+// query is used to generate the query.go file from query.peg
 // using pigeon as well as adding functions to the query.go package.
 package query
 
