@@ -3,6 +3,8 @@
 set -e
 
 # Setup requirements
+export GOBIN=$(pwd)/bin
+export PATH=$GOBIN:$PATH
 make gen
 sleep 1
-/go/bin/CompileDaemon --build="go build -o bin/goer ./cmd/goer" --exclude-dir=".git" --exclude-dir="**/**/test" --exclude-dir="**/**/gomock*" --command=./bin/goer -verbose
+CompileDaemon --build="go build -o bin/goer ./cmd/goer" --exclude-dir=".git" --exclude-dir="**/**/test" --exclude-dir="**/**/gomock*" --command=./bin/goer -verbose
