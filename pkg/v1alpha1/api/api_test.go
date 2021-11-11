@@ -43,7 +43,7 @@ func TestRoutes(t *testing.T) {
 		statusCode int
 	}{
 		{name: "EventsRead", httpMethod: http.MethodGet, url: "/v1alpha1/events/" + eventID, statusCode: http.StatusOK},
-		{name: "EventsReadAll", httpMethod: http.MethodGet, url: "/v1alpha1/events", statusCode: http.StatusOK},
+		{name: "EventsReadAll", httpMethod: http.MethodGet, url: "/v1alpha1/events?meta.type=EiffelArtifactCreatedEvent", statusCode: http.StatusOK},
 		{name: "SearchRead", httpMethod: http.MethodGet, url: "/v1alpha1/search/" + eventID, statusCode: http.StatusNotImplemented},
 		{name: "SearchUpstreamDownstream", httpMethod: http.MethodPost, url: "/v1alpha1/search/" + eventID, statusCode: http.StatusNotImplemented},
 	}
@@ -62,7 +62,7 @@ func TestRoutes(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			ctx := context.Background()
-			app, err := application.Get(ctx, mockCfg, &log.Entry{})
+			app, err := application.Get(ctx, mockCfg, log.NewEntry(log.New()))
 			if err != nil {
 				t.Error(err)
 			}
