@@ -104,7 +104,6 @@ func TestEvents(t *testing.T) {
 			if eventFromResponse.Meta.ID != testCase.eventID {
 				t.Error("event returned with response is not the same as the one in DB")
 			}
-
 		})
 	}
 }

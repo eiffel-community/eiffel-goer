@@ -83,9 +83,12 @@ func (app *Application) LoadV1Alpha1Routes() {
 // This is a blocking function, waiting for the webserver to shut down.
 func (app *Application) Start(ctx context.Context) error {
 	srv := app.Server.WithAddr(app.Config.APIPort()).WithRouter(app.Router)
-	defer app.Stop(ctx)
-	err := srv.Start()
-	if err != nil {
+	defer func() {
+		if err := app.Stop(ctx); err != nil {
+			app.Logger.Errorf("Error stopping application: %s", err)
+		}
+	}()
+	if err := srv.Start(); err != nil {
 		return err
 	}
 	srv.WaitStopped()

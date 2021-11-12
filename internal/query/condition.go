@@ -27,7 +27,7 @@ type Condition struct {
 	TypeConv string
 }
 
-// toIfaceSlice converts an interface to a slice of interfaces
+// toIfaceSlice converts an interface to a slice of interfaces.
 func toIfaceSlice(v interface{}) []interface{} {
 	if v == nil {
 		return nil

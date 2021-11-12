@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-// Test that RespondWithJSON writes the correct HTTP code, message and adds a content type header
+// Test that RespondWithJSON writes the correct HTTP code, message and adds a content type header.
 func TestRespondWithJSON(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 	RespondWithJSON(responseRecorder, 200, map[string]string{"hello": "world"})
@@ -41,7 +41,7 @@ func TestRespondWithJSON(t *testing.T) {
 	}
 }
 
-// Test that RespondWithError writes the correct HTTP code, message and adds a content type header
+// Test that RespondWithError writes the correct HTTP code, message and adds a content type header.
 func TestRespondWithError(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 	RespondWithError(responseRecorder, 400, "failure")

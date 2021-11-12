@@ -28,8 +28,7 @@ func Setup(cfg config.Config) error {
 	if err != nil {
 		return err
 	}
-	filePath := cfg.LogFilePath()
-	if filePath != "" {
+	if filePath := cfg.LogFilePath(); filePath != "" {
 		// TODO: Make these parameters configurable.
 		rotateFileHook, err := rotatefilehook.NewRotateFileHook(rotatefilehook.RotateFileConfig{
 			Filename:   filePath,

@@ -7,10 +7,14 @@ export DOCKER_REGISTRY ?= registry.nordix.org/eiffel
 export DEPLOY ?= goer
 
 COMPILEDAEMON = $(GOBIN)/CompileDaemon
+GIT = git
 GOER = $(GOBIN)/goer
+GOLANGCI_LINT = $(GOBIN)/golangci-lint
 GOVVV = $(GOBIN)/govvv
 MOCKGEN = $(GOBIN)/mockgen
 PIGEON = $(GOBIN)/pigeon
+
+GOLANGCI_LINT_VERSION = v1.43.0
 
 .PHONY: all
 all: test build start
@@ -31,6 +35,13 @@ clean:
 	$(RM) $(GOER) $(GOVVV) $(MOCKGEN) $(PIGEON)
 	docker-compose --project-directory . -f deploy/$(DEPLOY)/docker-compose.yml rm || true
 	docker volume rm goer-volume || true
+
+.PHONY: check
+check: staticcheck test
+
+.PHONY: staticcheck
+staticcheck: $(GOLANGCI_LINT)
+	$(GOLANGCI_LINT) run
 
 .PHONY: test
 test: gen
@@ -54,11 +65,25 @@ docker:
 push:
 	docker push $(DOCKER_REGISTRY)/$(DEPLOY):$(RELEASE_VERSION)
 
+.PHONY: tidy
+tidy:
+	go mod tidy
+
+.PHONY: check-dirty
+check-dirty:
+	$(GIT) diff --exit-code HEAD
+
 # Build dependencies
 
 $(COMPILEDAEMON):
 	mkdir -p $(dir $@)
 	go install github.com/githubnemo/CompileDaemon@v1.3.0
+
+$(GOLANGCI_LINT):
+	mkdir -p $(dir $@)
+	curl -sfL \
+			https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
+		| sh -s -- -b $(GOBIN) $(GOLANGCI_LINT_VERSION)
 
 $(GOVVV):
 	mkdir -p $(dir $@)

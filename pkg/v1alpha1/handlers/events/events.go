@@ -16,6 +16,7 @@
 package events
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 
@@ -45,7 +46,7 @@ func Get(cfg config.Config, db drivers.Database, logger *log.Entry) *EventHandle
 }
 
 // Read handles GET requests against the /events/{id} endpoint.
-// To get single event information
+// To get single event information.
 func (h *EventHandler) Read(w http.ResponseWriter, r *http.Request) {
 	var request requests.SingleEventRequest
 	if err := schema.NewDecoder().Decode(&request, r.URL.Query()); err != nil {
@@ -82,12 +83,14 @@ type multiResponse struct {
 
 // buildConditions takes a raw URL query, parses out all conditions and removes ignoreKeys.
 func buildConditions(rawQuery string, ignoreKeys map[string]struct{}) ([]query.Condition, error) {
-	var allConditions []query.Condition
 	res, err := query.Parse("nofile", []byte(rawQuery))
 	if err != nil {
 		return nil, err
 	}
-	allConditions = res.([]query.Condition)
+	allConditions, ok := res.([]query.Condition)
+	if !ok {
+		return nil, fmt.Errorf("query parser unexpectedly returned a %T value from the query %q", res, rawQuery)
+	}
 	var conditions []query.Condition
 	for _, condition := range allConditions {
 		_, ok := ignoreKeys[condition.Field]
@@ -99,7 +102,7 @@ func buildConditions(rawQuery string, ignoreKeys map[string]struct{}) ([]query.C
 }
 
 // ReadAll handles GET requests against the /events/ endpoint.
-// To get all events information
+// To get all events information.
 func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 	request := requests.MultipleEventsRequest{
 		Shallow:       false,
@@ -111,7 +114,11 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 	}
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
-	decoder.Decode(&request, r.URL.Query())
+	if err := decoder.Decode(&request, r.URL.Query()); err != nil {
+		h.Logger.Error(err)
+		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	ignoreKeys := getTags("schema", &request)
 	conditions, err := buildConditions(r.URL.RawQuery, ignoreKeys)

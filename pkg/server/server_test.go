@@ -16,6 +16,7 @@
 package server
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"testing"
@@ -77,7 +78,7 @@ func TestStart(t *testing.T) {
 		t.Error("server did not stop properly")
 	}
 	err = server.Error()
-	if err != nil && err != http.ErrServerClosed {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		t.Errorf("there was an error in the server %s", err)
 	}
 }

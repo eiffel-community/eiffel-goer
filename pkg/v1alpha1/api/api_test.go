@@ -77,7 +77,6 @@ func TestRoutes(t *testing.T) {
 			if responseRecorder.Code != expectedStatusCode {
 				t.Errorf("Want status '%d' for %q, got '%d'", expectedStatusCode, testCase.url, responseRecorder.Code)
 			}
-
 		})
 	}
 }

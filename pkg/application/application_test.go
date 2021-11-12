@@ -23,7 +23,6 @@ import (
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/test"
 	"github.com/eiffel-community/eiffel-goer/test/mock_config"
 	"github.com/eiffel-community/eiffel-goer/test/mock_drivers"
@@ -117,13 +116,8 @@ func TestGetDB(t *testing.T) {
 	application := &Application{
 		Config: mockCfg,
 	}
-	db, err := application.getDB(ctx)
-	if err != nil {
+	if _, err := application.getDB(ctx); err != nil {
 		t.Error(err)
-	}
-	_, ok := db.(drivers.Database)
-	if !ok {
-		t.Error("database from 'getDB' is not a Database interface")
 	}
 }
 
@@ -246,5 +240,7 @@ func TestStop(t *testing.T) {
 		t.Error(err)
 	}
 
-	app.Stop(ctx)
+	if err = app.Stop(ctx); err != nil {
+		t.Error(err)
+	}
 }

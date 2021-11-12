@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-// Test that it is possible to get a Cfg from Get with values taken from environment variables
+// Test that it is possible to get a Cfg from Get with values taken from environment variables.
 func TestGet(t *testing.T) {
 	port := "8080"
 	connectionString := "connection string"
