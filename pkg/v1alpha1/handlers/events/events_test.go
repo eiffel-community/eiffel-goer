@@ -25,6 +25,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/eiffel-community/eiffel-goer/internal/schema"
 	"github.com/eiffel-community/eiffel-goer/test/mock_config"
@@ -92,18 +93,10 @@ func TestEvents(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			handler.ServeHTTP(responseRecorder, testCase.request)
 
-			expectedStatusCode := testCase.statusCode
-			if responseRecorder.Code != expectedStatusCode {
-				t.Errorf("Want status '%d' for %q, got '%d'", expectedStatusCode, testCase.request.URL.String(), responseRecorder.Code)
-			}
+			assert.Equalf(t, testCase.statusCode, responseRecorder.Code, "Input URL: %s", testCase.request.URL)
 			eventFromResponse := schema.EiffelEvent{}
-			err = json.Unmarshal(responseRecorder.Body.Bytes(), &eventFromResponse)
-			if err != nil {
-				t.Error(err)
-			}
-			if eventFromResponse.Meta.ID != testCase.eventID {
-				t.Error("event returned with response is not the same as the one in DB")
-			}
+			assert.NoError(t, json.Unmarshal(responseRecorder.Body.Bytes(), &eventFromResponse))
+			assert.Equal(t, testCase.eventID, eventFromResponse.Meta.ID)
 		})
 	}
 }

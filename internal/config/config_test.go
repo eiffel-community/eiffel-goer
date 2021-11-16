@@ -18,6 +18,8 @@ package config
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Test that it is possible to get a Cfg from Get with values taken from environment variables.
@@ -32,21 +34,11 @@ func TestGet(t *testing.T) {
 	os.Setenv("LOG_FILE_PATH", logFilePath)
 
 	cfg, ok := Get().(*Cfg)
-	if !ok {
-		t.Error("cfg returned from get is not a config interface")
-	}
-	if cfg.connectionString != connectionString {
-		t.Error("connection string not set to environment variable CONNECTION_STRING")
-	}
-	if cfg.apiPort != port {
-		t.Error("api port not set to environment variable API_PORT")
-	}
-	if cfg.logLevel != logLevel {
-		t.Error("log level not set to environment variable LOGLEVEL")
-	}
-	if cfg.logFilePath != logFilePath {
-		t.Error("log file path not set to environment variable LOG_FILE_PATH")
-	}
+	assert.Truef(t, ok, "cfg returned from get is not a config interface")
+	assert.Equal(t, connectionString, cfg.connectionString)
+	assert.Equal(t, port, cfg.apiPort)
+	assert.Equal(t, logLevel, cfg.logLevel)
+	assert.Equal(t, logFilePath, cfg.logFilePath)
 }
 
 type getter func() string
@@ -74,9 +66,7 @@ func TestGetters(t *testing.T) {
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			if testCase.function() != testCase.value {
-				t.Errorf("function does not return %q from Cfg struct", testCase.value)
-			}
+			assert.Equal(t, testCase.value, testCase.function())
 		})
 	}
 }

@@ -24,6 +24,7 @@ import (
 	"github.com/eiffel-community/eiffel-goer/test/mock_drivers"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGet(t *testing.T) {
@@ -41,23 +42,17 @@ func TestGet(t *testing.T) {
 	mockDriver.EXPECT().Get(gomock.Any(), gomock.Any(), entry).Return(mockDB, nil)
 	ctx := context.Background()
 	_, err := database.Get(ctx, url, entry)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestGetUnknownScheme(t *testing.T) {
 	ctx := context.Background()
 	_, err := database.Get(ctx, "unknown://db/test", &log.Entry{})
-	if err == nil {
-		t.Error("possible to get a database with unknown:// scheme")
-	}
+	assert.Error(t, err)
 }
 
 func TestGetUnparsableScheme(t *testing.T) {
 	ctx := context.Background()
 	_, err := database.Get(ctx, "://", &log.Entry{})
-	if err == nil {
-		t.Error("possible to get a database with an unparsable scheme")
-	}
+	assert.Error(t, err)
 }

@@ -26,6 +26,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/eiffel-community/eiffel-goer/internal/schema"
 	"github.com/eiffel-community/eiffel-goer/pkg/application"
@@ -63,9 +64,7 @@ func TestRoutes(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			ctx := context.Background()
 			app, err := application.Get(ctx, mockCfg, log.NewEntry(log.New()))
-			if err != nil {
-				t.Error(err)
-			}
+			assert.NoError(t, err)
 			app.Database = mockDB
 			app.LoadV1Alpha1Routes()
 
@@ -73,10 +72,7 @@ func TestRoutes(t *testing.T) {
 			request := httptest.NewRequest(testCase.httpMethod, testCase.url, nil)
 
 			app.Router.ServeHTTP(responseRecorder, request)
-			expectedStatusCode := testCase.statusCode
-			if responseRecorder.Code != expectedStatusCode {
-				t.Errorf("Want status '%d' for %q, got '%d'", expectedStatusCode, testCase.url, responseRecorder.Code)
-			}
+			assert.Equal(t, testCase.statusCode, responseRecorder.Code)
 		})
 	}
 }

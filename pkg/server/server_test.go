@@ -16,97 +16,61 @@
 package server
 
 import (
-	"errors"
 	"log"
 	"net/http"
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGet(t *testing.T) {
-	_, ok := Get().(*WebServer)
-	if !ok {
-		t.Error("WebServer struct is not a Server interface")
-	}
+	assert.IsType(t, &WebServer{}, Get())
 }
 
 func TestWithAddr(t *testing.T) {
 	addr := "127.0.0.1:8080"
 	server, ok := Get().WithAddr(addr).(*WebServer)
-	if !ok {
-		t.Error("WebServer struct is not a Server interface")
-	}
-	if server.server.Addr != addr {
-		t.Error("address was not registered on server")
-	}
+	assert.Truef(t, ok, "WebServer struct is not a Server interface")
+	assert.Equal(t, addr, server.server.Addr)
 }
 
 func TestWithErrLogger(t *testing.T) {
 	logger := &log.Logger{}
 	server, ok := Get().WithErrLogger(logger).(*WebServer)
-	if !ok {
-		t.Error("WebServer struct is not a Server interface")
-	}
-	if server.server.ErrorLog != logger {
-		t.Error("logger was not registered on server")
-	}
+	assert.Truef(t, ok, "WebServer struct is not a Server interface")
+	assert.Equal(t, logger, server.server.ErrorLog)
 }
 
 func TestWithRouter(t *testing.T) {
 	router := mux.NewRouter()
 	server, ok := Get().WithRouter(router).(*WebServer)
-	if !ok {
-		t.Error("WebServer struct is not a Server interface")
-	}
-	if server.server.Handler != router {
-		t.Error("router was not registered on server")
-	}
+	assert.Truef(t, ok, "WebServer struct is not a Server interface")
+	assert.Equal(t, router, server.server.Handler)
 }
 
 func TestStart(t *testing.T) {
 	server := Get().WithAddr("127.0.0.1:8080").WithRouter(mux.NewRouter())
 	err := server.Start()
-	if err != nil {
-		t.Error(err)
-	}
-	if !server.WaitRunning() {
-		t.Error("server did not start properly")
-	}
+	assert.NoError(t, err)
+	assert.Truef(t, server.WaitRunning(), "server did not start properly")
 	server.Close()
-	if !server.WaitStopped() {
-		t.Error("server did not stop properly")
-	}
-	err = server.Error()
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		t.Errorf("there was an error in the server %s", err)
-	}
+	assert.Truef(t, server.WaitStopped(), "server did not stop properly")
+	assert.ErrorIs(t, server.Error(), http.ErrServerClosed)
 }
 
 func TestStartNoAddr(t *testing.T) {
 	server := Get().WithRouter(mux.NewRouter())
 	err := server.Start()
-	if err == nil {
-		t.Error(err)
-	}
-	if err.Error() != "server missing address" {
-		t.Errorf("error message does not specify it's missing address: %q", err.Error())
-	}
-	if server.WaitRunning() {
-		t.Error("server started when missing addr")
-	}
+	assert.Error(t, err)
+	assert.Equal(t, "server missing address", err.Error())
+	assert.False(t, server.WaitRunning())
 }
 
 func TestStartNoHandler(t *testing.T) {
 	server := Get().WithAddr("127.0.0.1:8080")
 	err := server.Start()
-	if err == nil {
-		t.Error(err)
-	}
-	if err.Error() != "server missing handler" {
-		t.Errorf("error message does not specify it's missing handler: %q", err.Error())
-	}
-	if server.WaitRunning() {
-		t.Error("server started when missing handler")
-	}
+	assert.Error(t, err)
+	assert.Equal(t, "server missing handler", err.Error())
+	assert.False(t, server.WaitRunning())
 }

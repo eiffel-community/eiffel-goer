@@ -22,6 +22,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/eiffel-community/eiffel-goer/test"
 	"github.com/eiffel-community/eiffel-goer/test/mock_config"
@@ -44,21 +45,11 @@ func TestGet(t *testing.T) {
 	defer test.ResetDatabaseDriver()
 
 	app, err := Get(ctx, mockCfg, &log.Entry{})
-	if err != nil {
-		t.Error(err)
-	}
-	if app.Config != mockCfg {
-		t.Errorf("config not set properly by Get")
-	}
-	if app.Database == nil {
-		t.Error("application did not set up database")
-	}
-	if app.Router == nil {
-		t.Error("application did not set up router")
-	}
-	if app.Server == nil {
-		t.Error("application did not set up server")
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, mockCfg, app.Config)
+	assert.NotNil(t, app.Database)
+	assert.NotNil(t, app.Router)
+	assert.NotNil(t, app.Server)
 }
 
 // Test that it is possible to get an application without a database.
@@ -69,21 +60,11 @@ func TestGetNoDB(t *testing.T) {
 	mockCfg.EXPECT().DBConnectionString().Return("")
 
 	app, err := Get(ctx, mockCfg, &log.Entry{})
-	if err != nil {
-		t.Error(err)
-	}
-	if app.Config != mockCfg {
-		t.Errorf("config not set properly by Get")
-	}
-	if app.Database != nil {
-		t.Error("application did not set up database")
-	}
-	if app.Router == nil {
-		t.Error("application did not set up router")
-	}
-	if app.Server == nil {
-		t.Error("application did not set up server")
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, mockCfg, app.Config)
+	assert.Nil(t, app.Database)
+	assert.NotNil(t, app.Router)
+	assert.NotNil(t, app.Server)
 }
 
 // Test that Get return error if there was an error when getting database.
@@ -94,9 +75,7 @@ func TestGetDBError(t *testing.T) {
 	mockCfg.EXPECT().DBConnectionString().Return("invalid://testdb").Times(2)
 
 	_, err := Get(ctx, mockCfg, &log.Entry{})
-	if err == nil {
-		t.Error("application should have raised error due to invalid database connection string")
-	}
+	assert.Errorf(t, err, "application should have raised error due to invalid database connection string")
 }
 
 // Test that getDB return a database interface.
@@ -116,9 +95,9 @@ func TestGetDB(t *testing.T) {
 	application := &Application{
 		Config: mockCfg,
 	}
-	if _, err := application.getDB(ctx); err != nil {
-		t.Error(err)
-	}
+
+	_, err := application.getDB(ctx)
+	assert.NoError(t, err)
 }
 
 // Test that the application creates the v1alpha1 subrouter.
@@ -136,15 +115,10 @@ func TestLoadV1Alpha1Routes(t *testing.T) {
 	defer test.ResetDatabaseDriver()
 
 	app, err := Get(ctx, mockCfg, &log.Entry{})
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
 	app.LoadV1Alpha1Routes()
-	route := app.Router.Get("v1alpha1")
-	if route == nil {
-		t.Error("the v1alpha1 route did not get loaded")
-	}
+	assert.NotNil(t, app.Router.Get("v1alpha1"))
 }
 
 // Test that the application starts the WebServer & connects to the Database.
@@ -166,9 +140,7 @@ func TestStart(t *testing.T) {
 	mockCfg.EXPECT().APIPort().Return(":8080")
 
 	app, err := Get(ctx, mockCfg, &log.Entry{})
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
 	mockServer.EXPECT().WithAddr(":8080").Return(mockServer)
 	mockServer.EXPECT().WithRouter(app.Router).Return(mockServer)
@@ -178,10 +150,7 @@ func TestStart(t *testing.T) {
 
 	app.Server = mockServer
 
-	err = app.Start(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, app.Start(ctx))
 }
 
 // Test that application returns error if server start fails.
@@ -203,9 +172,7 @@ func TestStartFail(t *testing.T) {
 	mockCfg.EXPECT().APIPort().Return("")
 
 	app, err := Get(ctx, mockCfg, &log.Entry{})
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
 	mockServer.EXPECT().WithAddr("").Return(mockServer)
 	mockServer.EXPECT().WithRouter(app.Router).Return(mockServer)
@@ -213,10 +180,7 @@ func TestStartFail(t *testing.T) {
 
 	app.Server = mockServer
 
-	err = app.Start(ctx)
-	if err == nil {
-		t.Error("application start did not abort when server.Start failed")
-	}
+	assert.Error(t, app.Start(ctx))
 }
 
 // Test that application closes the database on Stop.
@@ -236,11 +200,7 @@ func TestStop(t *testing.T) {
 	mockCfg.EXPECT().DBConnectionString().Return("mongodb://testdb/testdb").Times(2)
 
 	app, err := Get(ctx, mockCfg, &log.Entry{})
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
-	if err = app.Stop(ctx); err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, app.Stop(ctx))
 }
