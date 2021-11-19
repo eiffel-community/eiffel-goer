@@ -16,7 +16,6 @@
 package config
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,10 +27,10 @@ func TestGet(t *testing.T) {
 	connectionString := "connection string"
 	logLevel := "DEBUG"
 	logFilePath := "path/to/a/file"
-	os.Setenv("CONNECTION_STRING", connectionString)
-	os.Setenv("API_PORT", port)
-	os.Setenv("LOGLEVEL", logLevel)
-	os.Setenv("LOG_FILE_PATH", logFilePath)
+	t.Setenv("CONNECTION_STRING", connectionString)
+	t.Setenv("API_PORT", port)
+	t.Setenv("LOGLEVEL", logLevel)
+	t.Setenv("LOG_FILE_PATH", logFilePath)
 
 	cfg, ok := Get().(*Cfg)
 	assert.Truef(t, ok, "cfg returned from get is not a config interface")

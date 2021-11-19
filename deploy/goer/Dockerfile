@@ -1,4 +1,4 @@
-FROM golang:1.16.3-alpine AS build
+FROM golang:1.17.3-alpine AS build
 WORKDIR /tmp/goer
 COPY . .
 RUN go build -o ./bin/goer ./cmd/goer
