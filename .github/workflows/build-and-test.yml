@@ -20,3 +20,21 @@ jobs:
 
       - name: Build and test
         run: make build check tidy check-dirty
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          # We need to specify the context explicitly so the action doesn't
+          # grab the source straight from the git. That's not a problem in
+          # itself but the .git directory (needed by govvv) won't be available.
+          context: .
+          file: deploy/goer/Dockerfile
+          pull: true
