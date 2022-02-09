@@ -28,7 +28,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/eiffel-community/eiffel-goer/internal/schema"
+	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/pkg/application"
 	"github.com/eiffel-community/eiffel-goer/test/mock_config"
 	"github.com/eiffel-community/eiffel-goer/test/mock_drivers"
@@ -56,9 +56,9 @@ func TestRoutes(t *testing.T) {
 	mockCfg.EXPECT().DBConnectionString().Return("").AnyTimes()
 	mockCfg.EXPECT().APIPort().Return(":8080").AnyTimes()
 	// Have to use 'gomock.Any()' for the context as mux adds values to the request context.
-	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(schema.EiffelEvent{}, nil)
-	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]schema.EiffelEvent{}, nil)
-	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]schema.EiffelEvent{}, nil)
+	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(drivers.EiffelEvent{}, nil)
+	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]drivers.EiffelEvent{}, nil)
+	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]drivers.EiffelEvent{}, nil)
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {

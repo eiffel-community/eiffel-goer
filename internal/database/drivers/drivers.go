@@ -22,8 +22,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/eiffel-community/eiffel-goer/internal/requests"
-	"github.com/eiffel-community/eiffel-goer/internal/schema"
 )
+
+type EiffelEvent map[string]interface{}
 
 type DatabaseDriver interface {
 	Get(context.Context, *url.URL, *log.Entry) (Database, error)
@@ -31,9 +32,9 @@ type DatabaseDriver interface {
 }
 
 type Database interface {
-	GetEvents(context.Context, requests.MultipleEventsRequest) ([]schema.EiffelEvent, error)
-	SearchEvent(context.Context, string) (schema.EiffelEvent, error)
-	UpstreamDownstreamSearch(context.Context, string) ([]schema.EiffelEvent, error)
-	GetEventByID(context.Context, string) (schema.EiffelEvent, error)
+	GetEvents(context.Context, requests.MultipleEventsRequest) ([]EiffelEvent, error)
+	SearchEvent(context.Context, string) (EiffelEvent, error)
+	UpstreamDownstreamSearch(context.Context, string) ([]EiffelEvent, error)
+	GetEventByID(context.Context, string) (EiffelEvent, error)
 	Close(context.Context) error
 }

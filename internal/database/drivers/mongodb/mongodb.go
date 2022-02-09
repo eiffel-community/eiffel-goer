@@ -36,7 +36,6 @@ import (
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/internal/query"
 	"github.com/eiffel-community/eiffel-goer/internal/requests"
-	"github.com/eiffel-community/eiffel-goer/internal/schema"
 )
 
 // Database is a MongoDB database connection.
@@ -155,7 +154,7 @@ func (m *Database) collections(ctx context.Context, filter bson.D) ([]string, er
 }
 
 // GetEvents gets all events information.
-func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEventsRequest) ([]schema.EiffelEvent, error) {
+func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEventsRequest) ([]drivers.EiffelEvent, error) {
 	filter, err := buildFilter(request.Conditions)
 	if err != nil {
 		m.logger.Errorf("Database: %v", err)
@@ -168,10 +167,12 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 	}
 
 	m.logger.Debugf("fetching events from %d collections", len(collections))
-	var allEvents []schema.EiffelEvent
+	var allEvents []drivers.EiffelEvent
 	for _, collection := range collections {
-		var events []schema.EiffelEvent
-		cursor, err := m.database.Collection(collection).Find(ctx, filter)
+		var events []drivers.EiffelEvent
+		cursor, err := m.database.Collection(collection).Find(ctx, filter,
+			// Remove the _id field from the resulting document.
+			options.Find().SetProjection(bson.M{"_id": 0}))
 		if err != nil {
 			continue
 		}
@@ -185,33 +186,35 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 }
 
 // SearchEvent searches for an event based on event ID.
-func (m *Database) SearchEvent(ctx context.Context, id string) (schema.EiffelEvent, error) {
-	return schema.EiffelEvent{}, errors.New("not yet implemented")
+func (m *Database) SearchEvent(ctx context.Context, id string) (drivers.EiffelEvent, error) {
+	return drivers.EiffelEvent{}, errors.New("not yet implemented")
 }
 
 // UpstreamDownstreamSearch searches for events upstream and/or downstream of event by ID.
-func (m *Database) UpstreamDownstreamSearch(ctx context.Context, id string) ([]schema.EiffelEvent, error) {
+func (m *Database) UpstreamDownstreamSearch(ctx context.Context, id string) ([]drivers.EiffelEvent, error) {
 	return nil, errors.New("not yet implemented")
 }
 
 // GetEventByID gets an event by ID in all collections.
-func (m *Database) GetEventByID(ctx context.Context, id string) (schema.EiffelEvent, error) {
+func (m *Database) GetEventByID(ctx context.Context, id string) (drivers.EiffelEvent, error) {
 	collections, err := m.collections(ctx, bson.D{})
 	if err != nil {
-		return schema.EiffelEvent{}, err
+		return nil, err
 	}
 	filter := bson.D{{Key: "meta.id", Value: id}}
 	for _, collection := range collections {
-		var event schema.EiffelEvent
-		singleResult := m.database.Collection(collection).FindOne(ctx, filter)
+		var event bson.M
+		singleResult := m.database.Collection(collection).FindOne(ctx, filter,
+			// Remove the _id field from the resulting document.
+			options.FindOne().SetProjection(bson.M{"_id": 0}))
 		err := singleResult.Decode(&event)
 		if err != nil {
 			continue
 		} else {
-			return event, nil
+			return drivers.EiffelEvent(event), nil
 		}
 	}
-	return schema.EiffelEvent{}, fmt.Errorf("%q not found in any collection", id)
+	return nil, fmt.Errorf("%q not found in any collection", id)
 }
 
 // Close the database connection.

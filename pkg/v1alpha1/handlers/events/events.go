@@ -29,7 +29,6 @@ import (
 	"github.com/eiffel-community/eiffel-goer/internal/query"
 	"github.com/eiffel-community/eiffel-goer/internal/requests"
 	"github.com/eiffel-community/eiffel-goer/internal/responses"
-	eiffelSchema "github.com/eiffel-community/eiffel-goer/internal/schema"
 )
 
 type EventHandler struct {
@@ -75,10 +74,10 @@ func getTags(tagName string, item interface{}) map[string]struct{} {
 }
 
 type multiResponse struct {
-	PageNo           int32                      `json:"pageNo"`
-	PageSize         int32                      `json:"pageSize"`
-	TotalNumberItems int                        `json:"totalNumberItems"`
-	Items            []eiffelSchema.EiffelEvent `json:"items"`
+	PageNo           int32                 `json:"pageNo"`
+	PageSize         int32                 `json:"pageSize"`
+	TotalNumberItems int                   `json:"totalNumberItems"`
+	Items            []drivers.EiffelEvent `json:"items"`
 }
 
 // buildConditions takes a raw URL query, parses out all conditions and removes ignoreKeys.

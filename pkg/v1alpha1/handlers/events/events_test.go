@@ -22,12 +22,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/eiffel-community/eiffelevents-sdk-go"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-	"github.com/eiffel-community/eiffel-goer/internal/schema"
+	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/test/mock_config"
 	"github.com/eiffel-community/eiffel-goer/test/mock_drivers"
 )
@@ -47,22 +49,17 @@ var activityJSON = []byte(`
 }
 `)
 
-func loadEvent() (schema.EiffelEvent, error) {
-	event := schema.EiffelEvent{}
-	err := json.Unmarshal(activityJSON, &event)
-	if err != nil {
-		return event, err
-	}
-	return event, nil
-}
-
 // Test that the events/{id} endpoint work as expected.
 func TestEvents(t *testing.T) {
-	event, err := loadEvent()
-	if err != nil {
-		t.Error(err)
-	}
-	eventID := event.Meta.ID
+	// Load the test event twice; once as a drivers.EiffelEvent and once as
+	// a proper struct via eiffelevents. The latter is only used to easily
+	// extract the event ID.
+	eventMap := make(drivers.EiffelEvent)
+	require.NoError(t, json.Unmarshal(activityJSON, &eventMap))
+	event, err := eiffelevents.UnmarshalAny(activityJSON)
+	require.NoError(t, err)
+	eventID := event.(eiffelevents.MetaTeller).ID()
+
 	badRequest := httptest.NewRequest(http.MethodGet, "/events/"+eventID, nil)
 	q := badRequest.URL.Query()
 	q.Add("nah", "hello")
@@ -85,7 +82,7 @@ func TestEvents(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mockCfg := mock_config.NewMockConfig(ctrl)
 			mockDB := mock_drivers.NewMockDatabase(ctrl)
-			mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(event, testCase.mockError)
+			mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(eventMap, testCase.mockError)
 			app := Get(mockCfg, mockDB, &log.Entry{})
 			handler := mux.NewRouter()
 			handler.HandleFunc("/events/{id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", app.Read)
@@ -94,9 +91,9 @@ func TestEvents(t *testing.T) {
 			handler.ServeHTTP(responseRecorder, testCase.request)
 
 			assert.Equalf(t, testCase.statusCode, responseRecorder.Code, "Input URL: %s", testCase.request.URL)
-			eventFromResponse := schema.EiffelEvent{}
-			assert.NoError(t, json.Unmarshal(responseRecorder.Body.Bytes(), &eventFromResponse))
-			assert.Equal(t, testCase.eventID, eventFromResponse.Meta.ID)
+			if responseRecorder.Code == http.StatusOK {
+				assert.JSONEq(t, string(activityJSON), responseRecorder.Body.String())
+			}
 		})
 	}
 }
