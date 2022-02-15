@@ -78,7 +78,11 @@ Op <- ( "!=" / "%3C=" / "%3E=" / "%3C" / "%3E" / "=" ) {
 }
 
 Value <- [^&]* {
-    return string(c.text), nil
+    s, err := url.QueryUnescape(string(c.text))
+    if err != nil {
+        return nil, err
+    }
+    return s, nil
 }
 
 EOF <- !.
