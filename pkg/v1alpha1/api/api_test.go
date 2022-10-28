@@ -55,9 +55,10 @@ func TestRoutes(t *testing.T) {
 
 	mockCfg.EXPECT().DBConnectionString().Return("").AnyTimes()
 	mockCfg.EXPECT().APIPort().Return(":8080").AnyTimes()
+	var count int64 = 1
 	// Have to use 'gomock.Any()' for the context as mux adds values to the request context.
 	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(drivers.EiffelEvent{}, nil)
-	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]drivers.EiffelEvent{}, nil)
+	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]drivers.EiffelEvent{}, count, nil)
 	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]drivers.EiffelEvent{}, nil)
 
 	for _, testCase := range tests {
