@@ -76,7 +76,7 @@ func getTags(tagName string, item interface{}) map[string]struct{} {
 type multiResponse struct {
 	PageNo           int32                 `json:"pageNo"`
 	PageSize         int32                 `json:"pageSize"`
-	TotalNumberItems int                   `json:"totalNumberItems"`
+	TotalNumberItems int64                 `json:"totalNumberItems"`
 	Items            []drivers.EiffelEvent `json:"items"`
 }
 
@@ -127,7 +127,7 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Conditions = conditions
-	events, err := h.Database.GetEvents(r.Context(), request)
+	events, totalNumberItems, err := h.Database.GetEvents(r.Context(), request)
 	if err != nil {
 		h.Logger.Error(err)
 		responses.RespondWithError(w, http.StatusNotFound, err.Error())
@@ -136,7 +136,7 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 	response := multiResponse{
 		request.PageNo,
 		request.PageSize,
-		len(events), // TODO: This is not correct at the moment.
+		totalNumberItems,
 		events,
 	}
 	responses.RespondWithJSON(w, http.StatusOK, response)
