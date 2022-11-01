@@ -21,13 +21,13 @@ package requests
 import "github.com/eiffel-community/eiffel-goer/internal/query"
 
 type MultipleEventsRequest struct {
-	Shallow          bool  `schema:"shallow"` // TODO: Unused
-	PageNo           int32 `schema:"pageNo"`
-	PageSize         int32 `schema:"pageSize"`
-	PageStartItem    int32 `schema:"pageStartItem"`
-	Lazy             bool  `schema:"lazy"`
-	Readable         bool  `schema:"readable"` // TODO: Unused
-	Conditions       []query.Condition
+	Shallow       bool  `schema:"shallow"` // TODO: Unused
+	PageNo        int32 `schema:"pageNo"`
+	PageSize      int32 `schema:"pageSize"`
+	PageStartItem int32 `schema:"pageStartItem"`
+	Lazy          bool  `schema:"lazy"`
+	Readable      bool  `schema:"readable"` // TODO: Unused
+	Conditions    []query.Condition
 }
 
 type SingleEventRequest struct {
