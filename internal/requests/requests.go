@@ -25,7 +25,6 @@ type MultipleEventsRequest struct {
 	PageNo           int32 `schema:"pageNo"`
 	PageSize         int32 `schema:"pageSize"`
 	PageStartItem    int32 `schema:"pageStartItem"`
-	TotalNumberItems int32 `schema:"totalNumberItems"`
 	Lazy             bool  `schema:"lazy"`
 	Readable         bool  `schema:"readable"` // TODO: Unused
 	Conditions       []query.Condition
