@@ -177,8 +177,6 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 				SetLimit(int64(request.PageSize))
 
 		col := m.database.Collection(collection)
-		count, _ := col.CountDocuments(ctx, filter, &options.CountOptions{})
-		numberOfDocuments += count
 		cursor, err := col.Find(ctx, filter, findOptions)
 
 		if err != nil {
@@ -187,6 +185,12 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 		if err = cursor.All(ctx, &events); err != nil {
 			m.logger.Info(err.Error())
 			continue
+		}
+		if int32(len(events)) < request.PageSize && request.PageNo == 1 {
+			numberOfDocuments += int64(len(events))
+		} else {
+			count, _ := col.CountDocuments(ctx, filter, &options.CountOptions{})
+			numberOfDocuments += count
 		}
 		allEvents = append(allEvents, events...)
 	}
