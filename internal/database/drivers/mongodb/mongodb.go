@@ -171,12 +171,10 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 	var numberOfDocuments int64
 	for _, collection := range collections {
 		var events []drivers.EiffelEvent
-		findOptions := options.Find()
-		// Remove the _id field from the resulting document.
-		findOptions.SetProjection(bson.M{"_id": 0})
-		// PageNo starts at 1 instead of 0 so we need to decrement it by 1 here.
-		findOptions.SetSkip(int64((request.PageNo - 1) * request.PageSize))
-		findOptions.SetLimit(int64(request.PageSize))
+		findOptions := options.Find().
+				SetProjection(bson.M{"_id": 0}).
+				SetSkip(int64((request.PageNo - 1) * request.PageSize)).
+				SetLimit(int64(request.PageSize))
 
 		col := m.database.Collection(collection)
 		count, _ := col.CountDocuments(ctx, filter, &options.CountOptions{})
