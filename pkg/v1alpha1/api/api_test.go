@@ -20,6 +20,7 @@ package api_test
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -27,6 +28,7 @@ import (
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/pkg/application"
@@ -34,8 +36,26 @@ import (
 	"github.com/eiffel-community/eiffel-goer/test/mock_drivers"
 )
 
+var activityJSON = []byte(`
+{
+    "data": {
+        "name": "Test activity"
+    },
+    "links": [],
+    "meta": {
+        "id": "e04cf9d3-4d57-471e-bd65-f8fc20d21d84",
+        "time": 1629449650361,
+        "type": "EiffelActivityTriggeredEvent",
+        "version": "3.0.0"
+    }
+}
+`)
+
 // Test that all v1alpha1 endpoints are added properly.
 func TestRoutes(t *testing.T) {
+	eventMap := make(drivers.EiffelEvent)
+	require.NoError(t, json.Unmarshal(activityJSON, &eventMap))
+
 	eventID := "3fabaa6b-5343-4d74-8af9-dc2e4c1f2827"
 	tests := []struct {
 		name       string
@@ -56,9 +76,10 @@ func TestRoutes(t *testing.T) {
 	mockCfg.EXPECT().DBConnectionString().Return("").AnyTimes()
 	mockCfg.EXPECT().APIPort().Return(":8080").AnyTimes()
 	var count int64 = 1
+
 	// Have to use 'gomock.Any()' for the context as mux adds values to the request context.
-	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(drivers.EiffelEvent{}, nil)
-	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]drivers.EiffelEvent{}, count, nil)
+	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(eventMap, nil)
+	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]drivers.EiffelEvent{eventMap}, count, nil)
 	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]drivers.EiffelEvent{}, nil)
 
 	for _, testCase := range tests {

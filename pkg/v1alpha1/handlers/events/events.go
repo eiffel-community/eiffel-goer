@@ -49,14 +49,14 @@ func Get(cfg config.Config, db drivers.Database, logger *log.Entry) *EventHandle
 func (h *EventHandler) Read(w http.ResponseWriter, r *http.Request) {
 	var request requests.SingleEventRequest
 	if err := schema.NewDecoder().Decode(&request, r.URL.Query()); err != nil {
-		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
+		responses.RespondWithError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 	vars := mux.Vars(r)
 	ID := vars["id"]
 	event, err := h.Database.GetEventByID(r.Context(), ID)
 	if err != nil {
-		responses.RespondWithError(w, http.StatusNotFound, err.Error())
+		responses.RespondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
 	responses.RespondWithJSON(w, http.StatusOK, event)
@@ -115,7 +115,7 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 	decoder.IgnoreUnknownKeys(true)
 	if err := decoder.Decode(&request, r.URL.Query()); err != nil {
 		h.Logger.Error(err)
-		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
+		responses.RespondWithError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
@@ -123,14 +123,18 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 	conditions, err := buildConditions(r.URL.RawQuery, ignoreKeys)
 	if err != nil {
 		h.Logger.Error(err)
-		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
+		responses.RespondWithError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 	request.Conditions = conditions
 	events, totalNumberItems, err := h.Database.GetEvents(r.Context(), request)
 	if err != nil {
 		h.Logger.Error(err)
-		responses.RespondWithError(w, http.StatusNotFound, err.Error())
+		responses.RespondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	if len(events) == 0 {
+		responses.RespondWithError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
 	response := multiResponse{

@@ -29,7 +29,8 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	_, _ = w.Write(response)
 }
 
-// RespondWithError writes a JSON response with an error message and status code to the HTTP ResponseWriter.
+// RespondWithError writes a response with an error message and status code to the HTTP ResponseWriter.
 func RespondWithError(w http.ResponseWriter, code int, message string) {
-	RespondWithJSON(w, code, map[string]string{"error": message})
+	w.WriteHeader(code)
+	_, _ = w.Write([]byte(message))
 }

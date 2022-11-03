@@ -34,8 +34,7 @@ func TestRespondWithJSON(t *testing.T) {
 // Test that RespondWithError writes the correct HTTP code, message and adds a content type header.
 func TestRespondWithError(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
-	RespondWithError(responseRecorder, 400, "failure")
-	assert.Equal(t, "application/json", responseRecorder.Header().Get("Content-Type"))
+	RespondWithError(responseRecorder, 400, "Bad Request")
 	assert.Equal(t, 400, responseRecorder.Result().StatusCode)
-	assert.JSONEq(t, `{"error": "failure"}`, responseRecorder.Body.String())
+	assert.Equal(t, "Bad Request", responseRecorder.Body.String())
 }
