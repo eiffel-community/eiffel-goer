@@ -82,6 +82,9 @@ type multiResponse struct {
 
 // buildConditions takes a raw URL query, parses out all conditions and removes ignoreKeys.
 func buildConditions(rawQuery string, ignoreKeys map[string]struct{}) ([]query.Condition, error) {
+	if rawQuery == "" {
+		return nil, nil
+	}
 	res, err := query.Parse("nofile", []byte(rawQuery))
 	if err != nil {
 		return nil, err

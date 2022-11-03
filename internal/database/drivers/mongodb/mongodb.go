@@ -193,6 +193,9 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 			numberOfDocuments += count
 		}
 		allEvents = append(allEvents, events...)
+		if len(allEvents) >= int(request.PageSize) {
+			break
+		}
 	}
 	return allEvents, numberOfDocuments, nil
 }
