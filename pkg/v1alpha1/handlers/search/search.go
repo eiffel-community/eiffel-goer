@@ -38,12 +38,6 @@ func Get(cfg config.Config, db drivers.Database, logger *log.Entry) *SearchHandl
 	}
 }
 
-// Read handles GET requests against the /search/{id} endpoint.
-// To get an event based on eventId passed.
-func (h *SearchHandler) Read(w http.ResponseWriter, r *http.Request) {
-	responses.RespondWithError(w, http.StatusNotImplemented, http.StatusText(http.StatusNotImplemented))
-}
-
 // UpstreamDownstream handles POST requests against the /search/{id} endpoint.
 // To get upstream/downstream events for an event based on the searchParameters passed.
 func (h *SearchHandler) UpstreamDownstream(w http.ResponseWriter, r *http.Request) {
