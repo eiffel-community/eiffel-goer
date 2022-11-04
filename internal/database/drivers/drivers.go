@@ -33,7 +33,6 @@ type DatabaseDriver interface {
 
 type Database interface {
 	GetEvents(context.Context, requests.MultipleEventsRequest) ([]EiffelEvent, int64, error)
-	SearchEvent(context.Context, string) (EiffelEvent, error)
 	UpstreamDownstreamSearch(context.Context, string) ([]EiffelEvent, error)
 	GetEventByID(context.Context, string) (EiffelEvent, error)
 	Close(context.Context) error

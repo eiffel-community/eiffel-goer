@@ -197,11 +197,6 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 	return allEvents, numberOfDocuments, nil
 }
 
-// SearchEvent searches for an event based on event ID.
-func (m *Database) SearchEvent(ctx context.Context, id string) (drivers.EiffelEvent, error) {
-	return drivers.EiffelEvent{}, errors.New("not yet implemented")
-}
-
 // UpstreamDownstreamSearch searches for events upstream and/or downstream of event by ID.
 func (m *Database) UpstreamDownstreamSearch(ctx context.Context, id string) ([]drivers.EiffelEvent, error) {
 	return nil, errors.New("not yet implemented")
