@@ -39,9 +39,5 @@ func (app *V1Alpha1Application) AddRoutes(router *mux.Router) {
 
 	router.HandleFunc("/events", eventHandler.ReadAll).Methods("GET", "OPTIONS")
 	router.HandleFunc("/events/{id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", eventHandler.Read).Methods("GET", "OPTIONS")
-
-	// GET /search/:id and GET /events/:id are exactly the same. No need to duplicate the code.
-	router.HandleFunc("/search/{id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", eventHandler.Read).Methods("GET", "OPTIONS")
-
 	router.HandleFunc("/search/{id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", searchHandler.UpstreamDownstream).Methods("POST", "OPTIONS")
 }
