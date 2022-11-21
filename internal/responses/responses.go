@@ -32,6 +32,6 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 // RespondWithError writes a response with an error message and status code to the HTTP ResponseWriter.
 func RespondWithError(w http.ResponseWriter, code int, message string) {
 	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "text/plan; charset=utf-8")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte(message))
 }
