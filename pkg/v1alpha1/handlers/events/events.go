@@ -142,7 +142,7 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 		totalNumberItems,
 		events,
 	}
-	// This is required in order to get the reponse key 'items' to be an
+	// This is required in order to get the response key 'items' to be an
 	// empty JSON array instead of null when no events are returned.
 	if len(events) == 0 {
 		response.Items = make([]drivers.EiffelEvent, 0)
