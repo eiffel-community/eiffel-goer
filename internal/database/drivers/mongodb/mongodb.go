@@ -172,14 +172,14 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 	for _, collection := range collections {
 		var events []drivers.EiffelEvent
 		limit := request.PageSize - int32(len(allEvents))
-		findOptions := options.Find().
-			SetProjection(bson.M{"_id": 0}).
-			SetSkip(int64((request.PageNo - 1) * request.PageSize)).
-			SetLimit(int64(limit))
 
 		col := m.database.Collection(collection)
 		if limit > 0 {
-			cursor, err := col.Find(ctx, filter, findOptions)
+			cursor, err := col.Find(ctx, filter, options.Find().
+				SetProjection(bson.M{"_id": 0}).
+				SetSkip(int64((request.PageNo-1)*request.PageSize)).
+				SetLimit(int64(limit)),
+			)
 
 			if err != nil {
 				continue
