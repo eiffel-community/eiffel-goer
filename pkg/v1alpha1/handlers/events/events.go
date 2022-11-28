@@ -121,6 +121,10 @@ func (h *EventHandler) ReadAll(w http.ResponseWriter, r *http.Request) {
 		responses.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if request.PageSize < 0 {
+		responses.RespondWithError(w, http.StatusBadRequest, "PageSize must be a positive integer")
+		return
+	}
 
 	ignoreKeys := getTags("schema", &request)
 	conditions, err := buildConditions(r.URL.RawQuery, ignoreKeys)

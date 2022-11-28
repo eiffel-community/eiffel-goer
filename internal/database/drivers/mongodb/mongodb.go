@@ -167,7 +167,7 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 	}
 
 	m.logger.Debugf("fetching events from %d collections", len(collections))
-	allEvents := make([]drivers.EiffelEvent, 0)
+	allEvents := make([]drivers.EiffelEvent, 0, request.PageSize)
 	var numberOfDocuments int64
 	for _, collection := range collections {
 		var events []drivers.EiffelEvent
