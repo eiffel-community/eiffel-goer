@@ -30,7 +30,7 @@ jobs:
           submodules: "recursive"
 
       - name: Build Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           # We need to specify the context explicitly so the action doesn't
           # grab the source straight from the git. That's not a problem in
