@@ -59,7 +59,7 @@ stop:
 # Build a docker using the production Dockerfile
 .PHONY: docker
 docker:
-	docker build -t $(DOCKER_REGISTRY)/$(DEPLOY):$(RELEASE_VERSION) -f ./deploy/$(DEPLOY)/Dockerfile .
+	docker build --build-arg revision=$(RELEASE_VERSION) -t $(DOCKER_REGISTRY)/$(DEPLOY):$(RELEASE_VERSION) -f ./deploy/$(DEPLOY)/Dockerfile .
 
 .PHONY: push
 push:
