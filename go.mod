@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/schema v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/snowzach/rotatefilehook v0.0.0-20180327172521-2f64f265f58c
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver v1.7.1
 )
 
@@ -37,7 +37,7 @@ require (
 	golang.org/x/text v0.3.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
