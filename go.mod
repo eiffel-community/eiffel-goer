@@ -3,7 +3,7 @@ module github.com/eiffel-community/eiffel-goer
 go 1.17
 
 require (
-	github.com/golang/mock v1.4.4
+	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.2.0
 	github.com/sirupsen/logrus v1.9.3
@@ -41,7 +41,6 @@ require (
 
 require (
 	github.com/eiffel-community/eiffelevents-sdk-go v0.0.0-20220128085857-41fb1ce1ccc2
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
