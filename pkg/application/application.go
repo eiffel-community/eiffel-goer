@@ -25,7 +25,7 @@ import (
 	"github.com/eiffel-community/eiffel-goer/internal/database"
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
 	"github.com/eiffel-community/eiffel-goer/pkg/server"
-	v1alpha1 "github.com/eiffel-community/eiffel-goer/pkg/v1alpha1/api"
+	v1api "github.com/eiffel-community/eiffel-goer/pkg/v1/api"
 )
 
 type Application struct {
@@ -33,7 +33,7 @@ type Application struct {
 	Config   config.Config
 	Router   *mux.Router
 	Server   server.Server
-	V1Alpha1 *v1alpha1.V1Alpha1Application
+	V1       *v1api.V1Application
 	Logger   *log.Entry
 }
 
@@ -68,15 +68,15 @@ func (app *Application) getDB(ctx context.Context) (drivers.Database, error) {
 	return db, nil
 }
 
-// LoadV1Alpha1Routes loads routes for the /v1alpha1/ endpoint.
-func (app *Application) LoadV1Alpha1Routes() {
-	app.V1Alpha1 = &v1alpha1.V1Alpha1Application{
+// LoadV1Routes loads routes for the /v1/ endpoint.
+func (app *Application) LoadV1Routes() {
+	app.V1 = &v1api.V1Application{
 		Config:   app.Config,
 		Database: app.Database,
 		Logger:   app.Logger,
 	}
-	subrouter := app.Router.PathPrefix("/v1alpha1").Name("v1alpha1").Subrouter()
-	app.V1Alpha1.AddRoutes(subrouter)
+	subrouter := app.Router.PathPrefix("/v1").Name("v1").Subrouter()
+	app.V1.AddRoutes(subrouter)
 }
 
 // Start connects to the database and starts the webserver.

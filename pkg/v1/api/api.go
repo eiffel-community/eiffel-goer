@@ -22,18 +22,18 @@ import (
 
 	"github.com/eiffel-community/eiffel-goer/internal/config"
 	"github.com/eiffel-community/eiffel-goer/internal/database/drivers"
-	"github.com/eiffel-community/eiffel-goer/pkg/v1alpha1/handlers/events"
-	"github.com/eiffel-community/eiffel-goer/pkg/v1alpha1/handlers/search"
+	"github.com/eiffel-community/eiffel-goer/pkg/v1/handlers/events"
+	"github.com/eiffel-community/eiffel-goer/pkg/v1/handlers/search"
 )
 
-type V1Alpha1Application struct {
+type V1Application struct {
 	Database drivers.Database
 	Config   config.Config
 	Logger   *log.Entry
 }
 
 // Add routes for all handlers to the router.
-func (app *V1Alpha1Application) AddRoutes(router *mux.Router) {
+func (app *V1Application) AddRoutes(router *mux.Router) {
 	eventHandler := events.Get(app.Config, app.Database, app.Logger)
 	searchHandler := search.Get(app.Config, app.Database, app.Logger)
 

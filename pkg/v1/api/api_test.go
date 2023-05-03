@@ -51,7 +51,7 @@ var activityJSON = []byte(`
 }
 `)
 
-// Test that all v1alpha1 endpoints are added properly.
+// Test that all v1 endpoints are added properly.
 func TestRoutes(t *testing.T) {
 	eventMap := make(drivers.EiffelEvent)
 	require.NoError(t, json.Unmarshal(activityJSON, &eventMap))
@@ -63,9 +63,9 @@ func TestRoutes(t *testing.T) {
 		httpMethod string
 		statusCode int
 	}{
-		{name: "EventsRead", httpMethod: http.MethodGet, url: "/v1alpha1/events/" + eventID, statusCode: http.StatusOK},
-		{name: "EventsReadAll", httpMethod: http.MethodGet, url: "/v1alpha1/events?meta.type=EiffelArtifactCreatedEvent", statusCode: http.StatusOK},
-		{name: "SearchUpstreamDownstream", httpMethod: http.MethodPost, url: "/v1alpha1/search/" + eventID, statusCode: http.StatusNotImplemented},
+		{name: "EventsRead", httpMethod: http.MethodGet, url: "/v1/events/" + eventID, statusCode: http.StatusOK},
+		{name: "EventsReadAll", httpMethod: http.MethodGet, url: "/v1/events?meta.type=EiffelArtifactCreatedEvent", statusCode: http.StatusOK},
+		{name: "SearchUpstreamDownstream", httpMethod: http.MethodPost, url: "/v1/search/" + eventID, statusCode: http.StatusNotImplemented},
 	}
 
 	ctrl := gomock.NewController(t)
@@ -87,7 +87,7 @@ func TestRoutes(t *testing.T) {
 			app, err := application.Get(ctx, mockCfg, log.NewEntry(log.New()))
 			assert.NoError(t, err)
 			app.Database = mockDB
-			app.LoadV1Alpha1Routes()
+			app.LoadV1Routes()
 
 			responseRecorder := httptest.NewRecorder()
 			request := httptest.NewRequest(testCase.httpMethod, testCase.url, nil)

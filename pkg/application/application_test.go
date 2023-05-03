@@ -100,8 +100,8 @@ func TestGetDB(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Test that the application creates the v1alpha1 subrouter.
-func TestLoadV1Alpha1Routes(t *testing.T) {
+// Test that the application creates the v1 subrouter.
+func TestLoadV1Routes(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	mockCfg := mock_config.NewMockConfig(ctrl)
@@ -117,8 +117,8 @@ func TestLoadV1Alpha1Routes(t *testing.T) {
 	app, err := Get(ctx, mockCfg, &log.Entry{})
 	assert.NoError(t, err)
 
-	app.LoadV1Alpha1Routes()
-	assert.NotNil(t, app.Router.Get("v1alpha1"))
+	app.LoadV1Routes()
+	assert.NotNil(t, app.Router.Get("v1"))
 }
 
 // Test that the application starts the WebServer & connects to the Database.
