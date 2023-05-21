@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/schema v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/snowzach/rotatefilehook v0.0.0-20180327172521-2f64f265f58c
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	go.mongodb.org/mongo-driver v1.7.1
 )
 
