@@ -46,7 +46,7 @@ type Driver struct {
 
 // Get creates and connects a new database.Database interface against MongoDB.
 func (d *Driver) Get(ctx context.Context, connectionURL *url.URL, logger *log.Entry) (drivers.Database, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(connectionURL.String()))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(connectionURL.String()))
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,14 @@ func (d *Driver) Get(ctx context.Context, connectionURL *url.URL, logger *log.En
 		return nil, err
 	}
 	d.connectionString = connectionString
-	return d.connect(ctx, logger)
+	if err := d.client.Ping(ctx, readpref.Primary()); err != nil {
+		return &Database{}, err
+	}
+	return &Database{
+		database: d.client.Database(d.connectionString.Database),
+		client:   d.client,
+		logger:   logger,
+	}, nil
 }
 
 // Test whether the MongoDB driver supports a scheme.
@@ -69,22 +76,6 @@ func (d *Driver) SupportsScheme(scheme string) bool {
 	default:
 		return false
 	}
-}
-
-// Connect to the MongoDB database and ping it to make sure it works.
-func (d *Driver) connect(ctx context.Context, logger *log.Entry) (drivers.Database, error) {
-	err := d.client.Connect(ctx)
-	if err != nil {
-		return &Database{}, err
-	}
-	if err = d.client.Ping(ctx, readpref.Primary()); err != nil {
-		return &Database{}, err
-	}
-	return &Database{
-		database: d.client.Database(d.connectionString.Database),
-		client:   d.client,
-		logger:   logger,
-	}, nil
 }
 
 // Database is a connected database interface for requesting events from MongoDB.
@@ -137,20 +128,30 @@ func buildFilter(conditions []query.Condition) (bson.D, error) {
 // collections are the collection names from MongoDB but filtered so that not all collections
 // are hammered every time we get events.
 func (m *Database) collections(ctx context.Context, filter bson.D) ([]string, error) {
-	value, ok := filter.Map()["meta.type"]
+	typeConditions := m.findDValue(filter, "meta.type")
 	// meta.type not set, return all collections.
-	if !ok {
+	if typeConditions == nil {
 		return m.database.ListCollectionNames(ctx, bson.D{})
 	}
-	valueMap := value.(bson.D).Map()
-	collection, ok := valueMap["$eq"]
+
+	typeValue := m.findDValue(typeConditions.(bson.D), "$eq")
 	// No $eq. Apply collection filter to reduce the collection names
 	// request.
-	if !ok {
+	if typeValue == nil {
 		// TODO: Collection filter
 		return m.database.ListCollectionNames(ctx, bson.D{})
 	}
-	return []string{collection.(string)}, nil
+	return []string{typeValue.(string)}, nil
+}
+
+// findDValue walks through a bson.D and returns the value of the first matching key.
+func (m *Database) findDValue(d bson.D, key string) interface{} {
+	for _, e := range d {
+		if e.Key == key {
+			return e.Value
+		}
+	}
+	return nil
 }
 
 // GetEvents gets all events information.
