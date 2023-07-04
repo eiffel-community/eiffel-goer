@@ -14,7 +14,9 @@ GOVVV = $(GOBIN)/govvv
 MOCKGEN = $(GOBIN)/mockgen
 PIGEON = $(GOBIN)/pigeon
 
-GOLANGCI_LINT_VERSION = v1.43.0
+GOLANGCI_LINT_VERSION := v1.43.0
+GOLANGCI_LINT_INSTALLATION_SHA256 := 294771225087ee48c8e0a45a99ac82ed8f9c6e9d384e692ab201986479c8594f
+GOLANGCI_LINT_BINARY_SHA256 := c6f662fd533a7bff89c2d554dbe0708b6d3925f4b305d3522591d6bca0b48469
 
 .PHONY: all
 all: test build start
@@ -79,11 +81,17 @@ $(COMPILEDAEMON):
 	mkdir -p $(dir $@)
 	go install github.com/githubnemo/CompileDaemon@v1.3.0
 
+# Download the installation script for golangci-lint, verify its SHA-256 digest,
+# run it if everything checks out, and verify the resulting binary.
 $(GOLANGCI_LINT):
 	mkdir -p $(dir $@)
-	curl -sfL \
-			https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
-		| sh -s -- -b $(GOBIN) $(GOLANGCI_LINT_VERSION)
+	curl -sSfL \
+		https://raw.githubusercontent.com/golangci/golangci-lint/$(GOLANGCI_LINT_VERSION)/install.sh \
+		> $@.install-script-unverified
+	echo "$(GOLANGCI_LINT_INSTALLATION_SHA256) $@.install-script-unverified" | sha256sum -c --quiet -
+	sh -s -- -b $(dir $@) $(GOLANGCI_LINT_VERSION) < $@.install-script-unverified
+	rm -f $@.install-script-unverified
+	echo "$(GOLANGCI_LINT_BINARY_SHA256) $@" | sha256sum -c --quiet - || ( rm $@ ; exit 1 )
 
 $(GOVVV):
 	mkdir -p $(dir $@)
