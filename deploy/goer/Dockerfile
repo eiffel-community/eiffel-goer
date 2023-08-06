@@ -1,4 +1,4 @@
-FROM golang:1.20.5-alpine AS build
+FROM golang:1.20.7-alpine AS build
 
 RUN apk update && apk add --no-cache git make
 
