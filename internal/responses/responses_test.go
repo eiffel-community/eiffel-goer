@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,7 @@ func TestRespondWithJSON(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 	RespondWithJSON(responseRecorder, 200, map[string]string{"hello": "world"})
 	assert.Equal(t, "application/json", responseRecorder.Header().Get("Content-Type"))
-	assert.Equal(t, 200, responseRecorder.Result().StatusCode)
+	assert.Equal(t, 200, responseRecorder.Result().StatusCode) //nolint:bodyclose
 	assert.JSONEq(t, `{"hello": "world"}`, responseRecorder.Body.String())
 }
 
@@ -35,6 +35,6 @@ func TestRespondWithJSON(t *testing.T) {
 func TestRespondWithError(t *testing.T) {
 	responseRecorder := httptest.NewRecorder()
 	RespondWithError(responseRecorder, 400, "Bad Request")
-	assert.Equal(t, 400, responseRecorder.Result().StatusCode)
+	assert.Equal(t, 400, responseRecorder.Result().StatusCode) //nolint:bodyclose
 	assert.Equal(t, "Bad Request", responseRecorder.Body.String())
 }

@@ -5,30 +5,51 @@ linters:
     - asciicheck
     - bidichk
     - bodyclose
+    - containedctx
     - contextcheck
-    - deadcode
     - durationcheck
     - errcheck
+    - errchkjson
     - errname
     - errorlint
+    - exhaustive
     - exportloopref
-    - forcetypeassert
+    - gocheckcompilerdirectives
     - gocyclo
     - godot
-    - gofmt
+    - gofumpt
     - gosec
     - gosimple
+    - gosmopolitan
     - govet
-    - ifshort
+    - importas
     - ineffassign
+    - makezero
+    - mirror
     - misspell
+    - nilerr
+    - nilnil
+    - noctx
+    - nosprintfhostport
+    - predeclared
+    - reassign
+    - revive
     - staticcheck
+    - tenv
+    - testableexamples
     - typecheck
     - unconvert
     - unused
-    - varcheck
+    - usestdlibvars
     - wastedassign
     - whitespace
 linters-settings:
   misspell:
     locale: US
+  usestdlibvars:
+    crypto-hash: true
+    http-method: false
+    os-dev-null: true
+    sql-isolation-level: true
+    time-layout: true
+    tls-signature-scheme: true

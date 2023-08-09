@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import (
 
 // RespondWithJSON writes a JSON response with a status code to the HTTP ResponseWriter.
 func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
+	response, _ := json.Marshal(payload) //nolint:errchkjson
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

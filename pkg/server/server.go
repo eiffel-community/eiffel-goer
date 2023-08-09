@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -44,7 +45,9 @@ type WebServer struct {
 // Create a new WebServer.
 func Get() Server {
 	return &WebServer{
-		server:  &http.Server{},
+		server: &http.Server{
+			ReadTimeout: 10 * time.Second,
+		},
 		running: make(chan bool, 2), // Buffer up to two messages.
 		stopped: make(chan bool, 2), // Buffer up to two messages.
 	}

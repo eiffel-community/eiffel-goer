@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -180,7 +180,6 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 				SetSkip(int64((request.PageNo-1)*request.PageSize)).
 				SetLimit(int64(limit)),
 			)
-
 			if err != nil {
 				continue
 			}
@@ -201,7 +200,7 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 }
 
 // UpstreamDownstreamSearch searches for events upstream and/or downstream of event by ID.
-func (m *Database) UpstreamDownstreamSearch(ctx context.Context, id string) ([]drivers.EiffelEvent, error) {
+func (m *Database) UpstreamDownstreamSearch(_ context.Context, _ string) ([]drivers.EiffelEvent, error) {
 	return nil, errors.New("not yet implemented")
 }
 
@@ -220,9 +219,8 @@ func (m *Database) GetEventByID(ctx context.Context, id string) (drivers.EiffelE
 		err := singleResult.Decode(&event)
 		if err != nil {
 			continue
-		} else {
-			return drivers.EiffelEvent(event), nil
 		}
+		return drivers.EiffelEvent(event), nil
 	}
 	return nil, fmt.Errorf("%q not found in any collection", id)
 }
