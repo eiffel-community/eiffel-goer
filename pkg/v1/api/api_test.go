@@ -79,7 +79,8 @@ func TestRoutes(t *testing.T) {
 	// Have to use 'gomock.Any()' for the context as mux adds values to the request context.
 	mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(eventMap, nil)
 	mockDB.EXPECT().GetEvents(gomock.Any(), gomock.Any()).Return([]drivers.EiffelEvent{eventMap}, count, nil)
-	mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]drivers.EiffelEvent{}, nil)
+	// Disabled as SearchUpstreamDownstream is not yet implemented.
+	// mockDB.EXPECT().UpstreamDownstreamSearch(gomock.Any(), "id").Return([]drivers.EiffelEvent{}, nil)
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {

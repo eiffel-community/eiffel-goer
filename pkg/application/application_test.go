@@ -83,7 +83,7 @@ func TestGetDB(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	mockCfg := mock_config.NewMockConfig(ctrl)
-	mockCfg.EXPECT().DBConnectionString().Return("mongodb://testdb/testdb").Times(2)
+	mockCfg.EXPECT().DBConnectionString().Return("mongodb://testdb/testdb")
 
 	mockDriver := mock_drivers.NewMockDatabaseDriver(ctrl)
 	mockDB := mock_drivers.NewMockDatabase(ctrl)
