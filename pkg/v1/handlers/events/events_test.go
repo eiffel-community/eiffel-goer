@@ -70,11 +70,12 @@ func TestEvents(t *testing.T) {
 		request    *http.Request
 		statusCode int
 		eventID    string
+		expectCall bool
 		mockError  error
 	}{
-		{name: "Read", request: httptest.NewRequest(http.MethodGet, "/events/"+eventID, nil), statusCode: http.StatusOK, eventID: eventID},
-		{name: "ReadBadRequest", request: badRequest, statusCode: http.StatusBadRequest, eventID: ""},
-		{name: "ReadNotFound", request: httptest.NewRequest(http.MethodGet, "/events/"+eventID, nil), statusCode: http.StatusNotFound, eventID: "", mockError: errors.New("not found")},
+		{name: "Read", request: httptest.NewRequest(http.MethodGet, "/events/"+eventID, nil), statusCode: http.StatusOK, eventID: eventID, expectCall: true},
+		{name: "ReadBadRequest", request: badRequest, statusCode: http.StatusBadRequest, eventID: "", expectCall: false},
+		{name: "ReadNotFound", request: httptest.NewRequest(http.MethodGet, "/events/"+eventID, nil), statusCode: http.StatusNotFound, eventID: "", mockError: errors.New("not found"), expectCall: true},
 	}
 
 	for _, testCase := range tests {
@@ -82,7 +83,9 @@ func TestEvents(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mockCfg := mock_config.NewMockConfig(ctrl)
 			mockDB := mock_drivers.NewMockDatabase(ctrl)
-			mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(eventMap, testCase.mockError)
+			if testCase.expectCall {
+				mockDB.EXPECT().GetEventByID(gomock.Any(), eventID).Return(eventMap, testCase.mockError)
+			}
 			app := Get(mockCfg, mockDB, &log.Entry{})
 			handler := mux.NewRouter()
 			handler.HandleFunc("/events/{id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", app.Read)
