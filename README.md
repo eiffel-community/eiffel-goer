@@ -17,7 +17,11 @@ Eiffel Goer implements the event repository API and is intended as an open sourc
 
 ### Docker
 
-    docker run -e CONNECTION_STRING=yourdb -e API_PORT=8080 registry.nordix.org/eiffel/goer
+    docker run -e CONNECTION_STRING=yourdb -e API_PORT=8080 ghcr.io/eiffel-community/eiffel-goer:latest
+
+If you want to select a particular version instead of the latest one,
+see the [list of version-tagged
+images](https://github.com/eiffel-community/eiffel-goer/pkgs/container/eiffel-goer).
 
 ### Running a development server locally for testing. Will restart on code changes.
 

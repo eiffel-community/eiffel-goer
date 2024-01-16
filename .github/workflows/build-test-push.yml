@@ -1,0 +1,76 @@
+# This workflow is based on
+# https://docs.github.com/en/actions/publishing-packages/publishing-docker-images.
+
+name: Build, test, and push image
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.17.3"
+
+      - name: Build and test
+        run: make build check tidy check-dirty
+
+  build-push-docker-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Raise priority of the SHA-1 image to get it above the "latest"
+            # tag requested in the type=raw statement. The tag with the
+            # highest priority is what goes into the OCI label etc.
+            type=sha,priority=300
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          # We need to specify the context explicitly so the action doesn't
+          # grab the source straight from the git. That's not a problem in
+          # itself but the .git directory (needed by govvv) won't be available.
+          context: .
+          file: deploy/goer/Dockerfile
+          pull: true
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args:
+            version=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}

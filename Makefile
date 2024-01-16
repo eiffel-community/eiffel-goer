@@ -3,7 +3,6 @@ export GOBIN := $(CURDIR)/bin
 export PATH := $(GOBIN):$(PATH)
 
 export RELEASE_VERSION ?= $(shell git describe --always)
-export DOCKER_REGISTRY ?= registry.nordix.org/eiffel
 export DEPLOY ?= goer
 
 COMPILEDAEMON = $(GOBIN)/CompileDaemon
@@ -61,11 +60,7 @@ stop:
 # Build a docker using the production Dockerfile
 .PHONY: docker
 docker:
-	docker build --build-arg revision=$(RELEASE_VERSION) -t $(DOCKER_REGISTRY)/$(DEPLOY):$(RELEASE_VERSION) -f ./deploy/$(DEPLOY)/Dockerfile .
-
-.PHONY: push
-push:
-	docker push $(DOCKER_REGISTRY)/$(DEPLOY):$(RELEASE_VERSION)
+	docker build --build-arg revision=$(RELEASE_VERSION) -t eiffel-goer -f ./deploy/$(DEPLOY)/Dockerfile .
 
 .PHONY: tidy
 tidy:

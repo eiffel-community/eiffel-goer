@@ -10,8 +10,8 @@ FROM alpine:3.19.0
 ENTRYPOINT ["/app/goer"]
 COPY --from=build /tmp/goer/bin/goer /app/goer
 
-ARG revision
-LABEL com.datadoghq.tags.version="${revision}" \
+ARG version
+LABEL com.datadoghq.tags.version="${version}" \
       org.opencontainers.image.licenses="Apache-2.0" \
-      org.opencontainers.image.revision="${revision}" \
+      org.opencontainers.image.version="${version}" \
       org.opencontainers.image.source="https://github.com/eiffel-community/eiffel-goer"
