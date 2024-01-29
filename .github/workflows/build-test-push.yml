@@ -13,12 +13,13 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+
+  permissions:
+    contents: read
+    packages: write
+
   run-tests:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
