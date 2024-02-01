@@ -12,11 +12,11 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
-jobs:
+permissions:
+  contents: read
+  packages: write
 
-  permissions:
-    contents: read
-    packages: write
+jobs:
 
   run-tests:
     runs-on: ubuntu-latest
