@@ -41,7 +41,7 @@ import (
 // Database is a MongoDB database connection.
 type Driver struct {
 	client           *mongo.Client
-	connectionString connstring.ConnString
+	connectionString *connstring.ConnString
 }
 
 // Get creates and connects a new database.Database interface against MongoDB.
