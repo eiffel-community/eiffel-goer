@@ -1,6 +1,6 @@
 module github.com/eiffel-community/eiffel-goer
 
-go 1.17
+go 1.23.5
 
 require (
 	github.com/golang/mock v1.6.0

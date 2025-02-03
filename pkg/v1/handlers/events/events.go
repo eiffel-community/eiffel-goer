@@ -74,8 +74,8 @@ func getTags(tagName string, item interface{}) map[string]struct{} {
 }
 
 type multiResponse struct {
-	PageNo           int32                 `json:"pageNo"`
-	PageSize         int32                 `json:"pageSize"`
+	PageNo           int                   `json:"pageNo"`
+	PageSize         int                   `json:"pageSize"`
 	TotalNumberItems int64                 `json:"totalNumberItems"`
 	Items            []drivers.EiffelEvent `json:"items"`
 }

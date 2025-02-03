@@ -172,7 +172,7 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 	var numberOfDocuments int64
 	for _, collection := range collections {
 		var events []drivers.EiffelEvent
-		limit := request.PageSize - int32(len(allEvents))
+		limit := request.PageSize - len(allEvents)
 
 		col := m.database.Collection(collection)
 		if limit > 0 {
@@ -190,7 +190,7 @@ func (m *Database) GetEvents(ctx context.Context, request requests.MultipleEvent
 			}
 			allEvents = append(allEvents, events...)
 		}
-		if len(events) > 0 && int32(len(events)) < limit && request.PageNo == 1 {
+		if len(events) > 0 && len(events) < limit && request.PageNo == 1 {
 			numberOfDocuments += int64(len(events))
 		} else {
 			count, _ := col.CountDocuments(ctx, filter, &options.CountOptions{})
